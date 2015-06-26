@@ -4,90 +4,109 @@ write(txt, smp <- tempfile()) # write the Sager's data to temporary file
 phy.equ <- read.csv(smp)
 rm(smp, txt)
 
-phytochome <- function(df){
-  # comment
-  if(1 == 2){
-    "Arguments detail
-    df: data.frame. first column must be wavelength.
+phytochome <- 
+  function(df, fill = TRUE, alpha = 0.5, waveband = c(350, 850), peakPFD = 10){
+    # comment
+    if(1 == 2){
+      "Arguments detail
+      df: data.frame. first column must be wavelength.
+      This function able to handle plural dataset like belew
+      wavelength  data1   data2
+      350         4       3
+      351         5       2
+      352         8       2
+      353         10      3
+      ...
+      
+      Outputs
+      Outputs of this function are...
+      List
+      $phytochrome equilibrium
+      $PPFD (photons in 400-700 nm)
+      $PFD (photons in wavelength below 800 nm)
+      $spectrum (ggplot2 figure.
+      legend indicates the values of PFD, PPFD, and phytochromePSS.
+      
+      "
+    }
     
-    This function able to handle plural dataset like belew
-    wavelength  data1   data2
-    350         4       3
-    351         5       2
-    352         8       2
-    353         10      3
-    ...
-
-    Outputs
-    Outputs of this function are...
-    List
-    $phytochrome equilibrium
-    $PPFD (photons in 400-700 nm)
-    $PFD (photons in wavelength below 800 nm)
-    $spectrum (ggplot2 figure.
-    legend indicates the values of PFD, PPFD, and phytochromePSS.
-        
-    "
-  }
-
-  data.num <- dim(df)[2] - 1
-  colnames(df) <- c("wavelength", paste("dat", 1:data.num, sep = ""))
-  
-  df0 <- join(phy.equ, df, by = "wavelength")
-  
-  PPS <-
-    lapply(1:data.num, function(X){
-      sig.r <- sum(dat[, (X + 3)] * dat[, 2], na.rm = TRUE)
-      sig.fr <- sum(dat[, (X + 3)] * dat[, 3], na.rm = TRUE)
-      equ <- sig.r / (sig.r + sig.fr)
-      return(equ)
-    }) %>%
-    unlist()
-  
-#   PPFD <-
-#     lapply(1:data.num, function(X){
-#       dat %>%
-#         filter(wavelength <= 700) %>%
-#         filter(wavelength >= 400) %>%
-#         .[, X + 3] %>%
-#         sum() / 1000
-#     }) %>%
-#     unlist() %>%
-#     round(digits = 1)
-#   
-#   PFD <-
-#     lapply(1:data.num, function(X){
-#       dat %>%
-#         filter(wavelength <= 800) %>%
-#         .[, X + 3] %>%
-#         sum() / 1000
-#     }) %>%
-#     unlist() %>%
-#     round(digits = 1)
-#   
-#   colnames(input) <- c("wavelength", paste(as.character(PFD[1:data.num]),
-#                                            as.character(PPFD[1:data.num]),
-#                                            as.character(phytochrome.equ[1:data.num]),
-#                                            sep = "\n")
-#   )
-  
-  spectrum <-
-    input %>%
-    melt(data = ., id.vars = "wavelength") %>%
-    ggplot(data = ., aes(x = wavelength, y = value, color = variable, group = variable)) +
-    theme(legend.position = "top",
-          legend.text = element_text(size = 5)) +
-    geom_line() + xlim(c(350, 850)) + ylim(c(0, ymax)) +
-    xlab("wavelength [nm]") + ylab(uSPFD)
-  
-  results <- 
+    labels <- colnames(df) 
+    data.num <- dim(df)[2] - 1
+    colnames(df) <- c("wavelength", paste("dat", 1:data.num, sep = ""))
+    
+    df0 <-
+      join(phy.equ, df, by = "wavelength") %>%
+      na.omit
+    
+    PPS <-
+      lapply(1:data.num, function(X){
+        sig.r <- sum(df0[, (X + 3)] * df0[, 2], na.rm = TRUE)
+        sig.fr <- sum(df0[, (X + 3)] * df0[, 3], na.rm = TRUE)
+        equ <- sig.r / (sig.r + sig.fr)
+        return(equ)
+      }) %>%
+      unlist()
+    
+    #   PPFD <-
+    #     lapply(1:data.num, function(X){
+    #       dat %>%
+    #         filter(wavelength <= 700) %>%
+    #         filter(wavelength >= 400) %>%
+    #         .[, X + 3] %>%
+    #         sum() / 1000
+    #     }) %>%
+    #     unlist() %>%
+    #     round(digits = 1)
+    #   
+    #   PFD <-
+    #     lapply(1:data.num, function(X){
+    #       dat %>%
+    #         filter(wavelength <= 800) %>%
+    #         .[, X + 3] %>%
+    #         sum() / 1000
+    #     }) %>%
+    #     unlist() %>%
+    #     round(digits = 1)
+    #   
+    #   colnames(input) <- c("wavelength", paste(as.character(PFD[1:data.num]),
+    #                                            as.character(PPFD[1:data.num]),
+    #                                            as.character(phytochrome.equ[1:data.num]),
+    #                                            sep = "\n")
+    #   )
+    
+    if(fill == TRUE){
+      spectrum <- 
+        df %>%
+        set_names(labels) %>%
+        melt(data = ., id.vars = "wavelength") %>%
+        ggplot(data = ., aes(x = wavelength, y = value, col = variable, fill = variable, group = variable)) +
+        theme(legend.position = c(0.1,0.8),
+              legend.text = element_text(size = 5)) +
+        geom_area(alpha = .5, position = "identity") +
+        coord_cartesian(xlim = waveband, ylim = c(0, peakPFD)) +
+        xlab("wavelength [nm]") + ylab(uSPFD)
+    } else {
+      spectrum <-
+        df %>%
+        set_names(labels) %>%
+        melt(data = ., id.vars = "wavelength") %>%
+        ggplot(data = ., aes(x = wavelength, y = value, color = variable, group = variable)) +
+        theme(legend.position = c(0.1,0.8),
+              legend.text = element_text(size = 5)) +
+        geom_line() +
+        coord_cartesian(xlim = waveband, ylim = c(0, peakPFD)) +
+        xlab("wavelength [nm]") + ylab(uSPFD)
+    }
+    
+    
+    
     list(PPS, spectrum) %>%
-    set_names("Phtochrome PPS", "Spectrum") %>%
-  
-#   win.metafile(paste("from.", filename, ".emf", sep = ""),
-#                width = 10, height = 12, family = font)
-#   print(spectrum)
-#   dev.off()
-  
-  return
-  }
+      set_names(., c("Phtochrome PSS", "Spectrum")) %>%
+      
+      #   win.metafile(paste("from.", filename, ".emf", sep = ""),
+      #                width = 10, height = 12, family = font)
+      #   print(spectrum)
+      #   dev.off()
+      
+      return
+    }
