@@ -160,7 +160,7 @@ data <-
   mutate(LightOn = ONtime, LightOff = OFFtime,
          Time = ymd_hms(Time, locale="C", tz="Asia/Tokyo"),
          DayNight = Vectorize(DNdet)(Hour, LightOn, LightOff), # 昼夜表示
-         value = (value - Calb[2]) / Calb[1] # 校正s
+         val= (val - Calb[2]) / Calb[1] # 校正
         ) %>%
   select(-starts_with("Light"))
 
