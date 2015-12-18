@@ -1,21 +1,9 @@
 readGL <- function(ID, ch, StartDay, EndDay,
                    StartTime = "150000", EndTime = "150000",
-                   ONtime = 7, OFFtime = 23){  
-# 最初にこれだけは設定必要。
-# ログのパスの指定
-LogPath <- "~/Dropbox/GL_log/"
-
-# キャリブレーションシートの読み込み
-Calb <- 
-  "~/Dropbox/GL_log/CalbGL.csv" %>%
-  fread %>%
-  filter(GL_ID == ID, GL_ch == ch) %>%
-  select(Slope, Intercept) %>%
-  unlist
+                   ONtime = 7, OFFtime = 23,
+                   LogPath = "~/Dropbox/GL_log/"){  
 
 # 将来的にはクラウド化したい。
-  
-
 
 # ID:
 #   表示させたいロガーのID
@@ -38,8 +26,6 @@ Calb <-
 #   測定開始時間・終了時間を指定
 #   例: "150000" (15:00:00の場合)
 
-
-
 # A: chamA-F @419
 #   ch1 = chamF, ch2 = chamE, ... ch6 = chamA 
 # B: chamK-N @420
@@ -47,11 +33,19 @@ Calb <-
 # D: chamG-J @420
 #   ch1 = chamJ, ch2 = chamI, ... ch3 = chamG 
 
-
 library(ggplot2)
 library(tidyr)
 library(data.table)
 library(lubridate)
+
+# キャリブレーションシートの読み込み
+Calb <- 
+  paste0(LogPath, "CalbGL.csv") %>%
+  fread %>%
+  filter(GL_ID == ID, GL_ch == ch) %>%
+  select(Slope, Intercept) %>%
+  unlist
+
 
 # 警告設定を緩和
 # tidyr::separateで多く出るので
@@ -64,8 +58,6 @@ options(warn = -1)
     Hour <- as.numeric(Hour)
     ifelse(test = (Hour >= ONtime && Hour < OFFtime) , yes = "Day", no = "Night")
   }
-
-
 
 # データハンドリング
 AllDataDirs <-
@@ -107,51 +99,22 @@ selected_ch <- paste0("ch", ch)
 
 Raw <-
   lapply(1:length(DataDirs), function(i){
-############ 
-#     if (class(try(fread(input = DataDirs[i]), silent = TRUE)) == "try-error") {
-#       # fread関数がエラーになった場合はループ抜け
-#       # データ数が１のときとかにエラーが出るので、例外処理
-#         data.frame(Time = "NA", val = NA) %>%
-#         return
-#     } else {
-#       # エラーに該当しなければファイルの読み込みを進行する
-#         temp <- fread(input = DataDirs[i])
-#         COLs <-
-#           colnames(temp) %>%
-#           str_split(pattern = ",") %>%
-#           .[[2]] %>%
-#           str_replace_all(pattern = "\"", "")
-#     
-#     temp <-
-#       temp %>%
-#       separate_(., col = colnames(temp)[1], into = c("No", "Date"), sep = ".,", remove = T) %>%
-#       separate_(col = colnames(temp)[2], into = COLs, sep = ",", remove = T) %>%
-#       mutate(Time = paste0(Date, " ", ms))
-#     
-#     colnames(temp)[-(1:3)] <- c(paste0("ch", 1:(dim(temp)[2]- 4)), "Time") 
-#     
-#     temp %>%
-#       select_("Time", val = selected_ch) %>%
-#       mutate(val = extract_numeric(val)) %>%
-#       return
-#     }
-#################
-      if (class(try(fread(input = DataDirs[i], skip = 33), silent = TRUE)) == "try-error") {
-        # fread関数がエラーになった場合はループ抜け
-        # データ数が１のときとかにエラーが出るので、例外処理
-        data.frame(Time = "NA", val = NA) %>%
-          return
-      } else {
-        # エラーに該当しなければファイルの読み込みを進行する
-        temp <-
-          fread(input = DataDirs[i], skip = 33)
-                  
-        temp %>%
-          setnames(c("No", "Time", "ms", paste0("ch", 1:(dim(temp)[2] - 3)))) %>%
-          select_("Time", val = selected_ch) %>%
-          mutate(val = extract_numeric(val)) %>%
-          return
-      }
+    if (class(try(fread(input = DataDirs[i], skip = 33), silent = TRUE)) == "try-error") {
+      # fread関数がエラーになった場合はループ抜け
+      # データ数が１のときとかにエラーが出るので、例外処理
+      data.frame(Time = "NA", val = NA) %>%
+        return
+    } else {
+      # エラーに該当しなければファイルの読み込みを進行する
+      temp <-
+        fread(input = DataDirs[i], skip = 33)
+                
+      temp %>%
+        setnames(c("No", "Time", "ms", paste0("ch", 1:(dim(temp)[2] - 3)))) %>%
+        select_("Time", val = selected_ch) %>%
+        mutate(val = extract_numeric(val)) %>%
+        return
+    }
   }) %>%
   rbind_all %>%
   na.omit %>%

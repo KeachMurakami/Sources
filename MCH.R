@@ -1,193 +1,160 @@
 readMCH <- function(ID, StartDay, EndDay,
                     StartTime = "150000", EndTime = "150000",
-                    ONtime = 7, OFFtime = 23){
-  # 最初にこれだけは設定必要。
-  # ログのパスの指定
-  LogPath <- "~/Dropbox/MCH_log/"
+                    ONtime = 7, OFFtime = 23,
+                    LogPath = "~/Dropbox/MCH_log/"){
+   
+# 将来的にはクラウド化したい。
+
+# ID:
+#   表示させたいMCHのID
+#   例: "1"
+# 
+# StartDay, EndDay:
+#   見たい区間を指定
+#   例: 150911 (2015年9月11日の場合)
+# 
+# ONtime, OFFtime:
+#   光源のON/OFF時間を指定
+#   例: ONtime = 10, OFFtime = 20
+#   デフォルトは7時にON、23時にOFF
+# 
+# StartTime, EndTime: 
+#   測定開始時間・終了時間を指定
+#   例: "150000" (15:00:00の場合)  
+
+library(ggplot2)
+library(tidyr)
+library(data.table)
+library(lubridate)
+
+# キャリブレーションシートの読み込み
+Calb <- 
+  paste0(LogPath, "CalbMCH.csv") %>%
+  fread %>%
+  filter(MCH_ID == ID) %>%
+  select(starts_with("Slope"), starts_with("Intercept")) %>%
+  unlist
   
-  # キャリブレーションシートの読み込み
-  Calb <- 
-    "~/Dropbox/MCH_log/CalbMCH.csv" %>%
-    fread %>%
-    filter(MCH_ID == ID) %>%
-    select(starts_with("Slope"), starts_with("Intercept")) %>%
-    unlist
-  
-  # 将来的にはクラウド化したい。
-  
-  
-  
-  # ID:
-  #   表示させたいMCHのID
-  #   例: "1"
-  # 
-  # StartDay, EndDay:
-  #   見たい区間を指定
-  #   例: 150911 (2015年9月11日の場合)
-  # 
-  # ONtime, OFFtime:
-  #   光源のON/OFF時間を指定
-  #   例: ONtime = 10, OFFtime = 20
-  #   デフォルトは7時にON、23時にOFF
-  # 
-  # StartTime, EndTime: 
-  #   測定開始時間・終了時間を指定
-  #   例: "150000" (15:00:00の場合)  
-  
-  library(ggplot2)
-  library(tidyr)
-  library(data.table)
-  library(lubridate)
-  
-  # 警告設定を緩和
-  # tidyr::separateで多く出るので
-  warn.value <- as.numeric(options("warn"))
-  options(warn = -1)
+# 警告設定を緩和
+# tidyr::separateで多く出るので
+warn.value <- as.numeric(options("warn"))
+options(warn = -1)
   
   
-  # 時間に応じて昼夜を追加する関数
-  DNdet <- function(Hour, ONtime, OFFtime){
-    Hour <- as.numeric(Hour)
-    ifelse(test = (Hour >= ONtime && Hour < OFFtime) , yes = "Day", no = "Night")
-  }
+# 時間に応じて昼夜を追加する関数
+DNdet <- function(Hour, ONtime, OFFtime){
+  Hour <- as.numeric(Hour)
+  ifelse(test = (Hour >= ONtime && Hour < OFFtime) , yes = "Day", no = "Night")
+}
   
   
   
-  # データハンドリング
-  AllDataDirs <-
-    dir(paste0(LogPath, "No", formatC(ID, digits = 1, flag = "0"), "/")) %>%
-    as.numeric
-  
-  inRanges <-
-    ((AllDataDirs > StartDay) & (AllDataDirs <= EndDay)) %>%
+# データハンドリング
+AllDataDirs <-
+  dir(paste0(LogPath, "No", formatC(ID, digits = 1, flag = "0"), "/")) %>%
+  as.numeric
+
+inRanges <-
+  ((AllDataDirs > StartDay) & (AllDataDirs <= EndDay)) %>%
+  which %>%
+  range
+
+if(is.infinite(inRanges[1])) {
+  DataDirs <-
+    (AllDataDirs < StartDay) %>%
     which %>%
-    range
+    max %>%
+    AllDataDirs[.] %>%
+    paste0(LogPath, "No", formatC(ID, digits = 1, flag = "0"), "/", ., "/") %>%
+    dir(full.names = TRUE)
+} else {
+  Used <-
+    AllDataDirs[(inRanges[1] - 1):inRanges[2]]
+  DataDirs <-
+    AllDataDirs[(inRanges[1] - 1):inRanges[2]] %>% # minの１つ前までにデータが含まれる
+    paste0(LogPath, "No", formatC(ID, digits = 1, flag = "0"), "/", ., "/") %>%
+    dir(full.names = TRUE)
+  rm(Used)
+}
+
+# 指定期間のログデータがない場合の処理。
+if(length(DataDirs) == 0){
+  print("no CSV files detected")
+  break
+}
+
+StartFolder <- dirname(DataDirs)[1]
   
-  if(is.infinite(inRanges[1])) {
-    DataDirs <-
-      (AllDataDirs < StartDay) %>%
-      which %>%
-      max %>%
-      AllDataDirs[.] %>%
-      paste0(LogPath, "No", formatC(ID, digits = 1, flag = "0"), "/", ., "/") %>%
-      dir(full.names = TRUE)
-  } else {
-    Used <-
-      AllDataDirs[(inRanges[1] - 1):inRanges[2]]
-    DataDirs <-
-      AllDataDirs[(inRanges[1] - 1):inRanges[2]] %>% # minの１つ前までにデータが含まれる
-      paste0(LogPath, "No", formatC(ID, digits = 1, flag = "0"), "/", ., "/") %>%
-      dir(full.names = TRUE)
-    rm(Used)
-  }
-  
-  # 指定期間のログデータがない場合の処理。
-  if(length(DataDirs) == 0){
-    print("no CSV files detected")
-    break
-  }
-  
-  StartFolder <- dirname(DataDirs)[1]
-    
-  Raw <-
-    lapply(1:length(DataDirs), function(i){
-      ############ 
-      #     if (class(try(fread(input = DataDirs[i]), silent = TRUE)) == "try-error") {
-      #       # fread関数がエラーになった場合はループ抜け
-      #       # データ数が１のときとかにエラーが出るので、例外処理
-      #         data.frame(Time = "NA", val = NA) %>%
-      #         return
-      #     } else {
-      #       # エラーに該当しなければファイルの読み込みを進行する
-      #         temp <- fread(input = DataDirs[i])
-      #         COLs <-
-      #           colnames(temp) %>%
-      #           str_split(pattern = ",") %>%
-      #           .[[2]] %>%
-      #           str_replace_all(pattern = "\"", "")
-      #     
-      #     temp <-
-      #       temp %>%
-      #       separate_(., col = colnames(temp)[1], into = c("No", "Date"), sep = ".,", remove = T) %>%
-      #       separate_(col = colnames(temp)[2], into = COLs, sep = ",", remove = T) %>%
-      #       mutate(Time = paste0(Date, " ", ms))
-      #     
-      #     colnames(temp)[-(1:3)] <- c(paste0("ch", 1:(dim(temp)[2]- 4)), "Time") 
-      #     
-      #     temp %>%
-      #       select_("Time", val = selected_ch) %>%
-      #       mutate(val = extract_numeric(val)) %>%
-      #       return
-      #     }
-      #################
-      if (class(try(fread(input = DataDirs[i]), silent = TRUE)) == "try-error") {
-        # fread関数がエラーになった場合はループ抜け
-        # データ数が１のときとかにエラーが出るので、例外処理
-        data.frame(Time = "NA", val = NA) %>%
-          return
-      } else {
-        # エラーに該当しなければファイルの読み込みを進行する
-        temp <-
-          fread(input = DataDirs[i])
-        
-        temp %>%
-          select(Date, Time, ends_with("Value")) %>%
-          setnames(c("Day", "Time", "Hum", "Temp", "CO2")) %>%
-          return
-      }
-    }) %>%
-    rbind_all %>%
-    filter(CO2 != 0) %>%
-    na.omit %>%
-    separate(col = Time, into = c("Hour", "Min", "Sec"), sep = ":", remove = F) %>%
-    mutate(Time = paste0(Day, " ", Time),
-           LightOn = ONtime, LightOff = OFFtime,
-           Time = ymd_hms(Time, locale="C", tz="Asia/Tokyo"),
-           DayNight = Vectorize(DNdet)(Hour, LightOn, LightOff), # 昼夜表示
-           Hum = (Hum - Calb[4]) / Calb[1],
-           Temp = (Temp - Calb[5]) / Calb[2],
-           CO2 = (CO2 - Calb[6]) / Calb[3]
-    ) %>%
-    select(-starts_with("Light")) %>%
-  # 処理開始、終了時間でカットする
-    filter(Time > ymd_hms(paste0(StartDay, " ", StartTime), tz = "Asia/Tokyo"),
-           Time < ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo")) %>%
-    mutate(ID = ID,
-           start = ymd_hms(paste0(StartDay, " ", StartTime)),
-           end = ymd_hms(paste0(EndDay, " ", EndTime)))
-  
-  Raw %>%
-  {
-    # 1時間平均
-    meanHour <<-
-      mutate(., IDs = paste0(Day, " ", Hour)) %>%
-      group_by(DayNight, ID, start, end, IDs) %>%
-      summarise(MeanHum = mean(Hum), SDHum = sd(Hum),
-                MeanTemp = mean(Temp), SDTemp = sd(Temp),
-                MeanCO2 = mean(CO2), SDCO2 = sd(CO2)) %>%
-      ungroup %>%
-      mutate(Time = paste0(IDs, "-00-00"),
-             Time = ymd_hms(Time)) 
-    # 1日平均
-    meanDay <<-
-      group_by(., ID, start, end, Day, DayNight) %>%
-      summarise(MeanHum = mean(Hum), SDHum = sd(Hum),
-                MeanTemp = mean(Temp), SDTemp = sd(Temp),
-                MeanCO2 = mean(CO2), SDCO2 = sd(CO2)) %>%
-      ungroup %>%
-      mutate(Time = ymd(Day))
-    # 期間平均
-    meanAll <<-
-      group_by(., ID, start, end, DayNight) %>%
-      summarise(MeanHum = mean(Hum), SDHum = sd(Hum),
-                MeanTemp = mean(Temp), SDTemp = sd(Temp),
-                MeanCO2 = mean(CO2), SDCO2 = sd(CO2))    
-  }
-  
-  options(warn = warn.value) # 警告設定を元に戻す
-  
-  list(Raw = Raw, Hourly = meanHour, Daily = meanDay, Span = meanAll) %>%
-    return
+Raw <-
+  lapply(1:length(DataDirs), function(i){
+    if (class(try(fread(input = DataDirs[i]), silent = TRUE)) == "try-error") {
+      # fread関数がエラーになった場合はループ抜け
+      # データ数が１のときとかにエラーが出るので、例外処理
+      data.frame(Time = "NA", val = NA) %>%
+        return
+    } else {
+      # エラーに該当しなければファイルの読み込みを進行する
+      temp <-
+        fread(input = DataDirs[i])
+      
+      temp %>%
+        select(Date, Time, ends_with("Value")) %>%
+        setnames(c("Day", "Time", "Hum", "Temp", "CO2")) %>%
+        return
+    }
+  }) %>%
+  rbind_all %>%
+  filter(CO2 != 0) %>%
+  na.omit %>%
+  separate(col = Time, into = c("Hour", "Min", "Sec"), sep = ":", remove = F) %>%
+  mutate(Time = paste0(Day, " ", Time),
+         LightOn = ONtime, LightOff = OFFtime,
+         Time = ymd_hms(Time, locale="C", tz="Asia/Tokyo"),
+         DayNight = Vectorize(DNdet)(Hour, LightOn, LightOff), # 昼夜表示
+         Hum = (Hum - Calb[4]) / Calb[1],
+         Temp = (Temp - Calb[5]) / Calb[2],
+         CO2 = (CO2 - Calb[6]) / Calb[3]
+  ) %>%
+  select(-starts_with("Light")) %>%
+# 処理開始、終了時間でカットする
+  filter(Time > ymd_hms(paste0(StartDay, " ", StartTime), tz = "Asia/Tokyo"),
+         Time < ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo")) %>%
+  mutate(ID = ID,
+         start = ymd_hms(paste0(StartDay, " ", StartTime)),
+         end = ymd_hms(paste0(EndDay, " ", EndTime)))
+
+Raw %>%
+{
+  # 1時間平均
+  meanHour <<-
+    mutate(., IDs = paste0(Day, " ", Hour)) %>%
+    group_by(DayNight, ID, start, end, IDs) %>%
+    summarise(MeanHum = mean(Hum), SDHum = sd(Hum),
+              MeanTemp = mean(Temp), SDTemp = sd(Temp),
+              MeanCO2 = mean(CO2), SDCO2 = sd(CO2)) %>%
+    ungroup %>%
+    mutate(Time = paste0(IDs, "-00-00"),
+           Time = ymd_hms(Time)) 
+  # 1日平均
+  meanDay <<-
+    group_by(., ID, start, end, Day, DayNight) %>%
+    summarise(MeanHum = mean(Hum), SDHum = sd(Hum),
+              MeanTemp = mean(Temp), SDTemp = sd(Temp),
+              MeanCO2 = mean(CO2), SDCO2 = sd(CO2)) %>%
+    ungroup %>%
+    mutate(Time = ymd(Day))
+  # 期間平均
+  meanAll <<-
+    group_by(., ID, start, end, DayNight) %>%
+    summarise(MeanHum = mean(Hum), SDHum = sd(Hum),
+              MeanTemp = mean(Temp), SDTemp = sd(Temp),
+              MeanCO2 = mean(CO2), SDCO2 = sd(CO2))    
+}
+
+options(warn = warn.value) # 警告設定を元に戻す
+
+list(Raw = Raw, Hourly = meanHour, Daily = meanDay, Span = meanAll) %>%
+  return
 
 }
 
