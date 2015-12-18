@@ -3,28 +3,22 @@ readGL <- function(ID, ch, StartDay, EndDay,
                    ONtime = 7, OFFtime = 23,
                    LogPath = "~/Dropbox/GL_log/"){  
 
-# 将来的にはクラウド化したい。
 
-# ID:
-#   表示させたいロガーのID
-#   例: "A"
+# ID: chr
+#   logger's ID
+#
+# ch: num
+#   channel
 # 
-# ch: 
-#   表示させたいロガーのチャネル
-#   例: 1
-# 
-# StartDay, EndDay:
-#   見たい区間を指定
-#   例: 150911 (2015年9月11日の場合)
+# StartDay, EndDay: num 150911 (2015.9.11.)
 # 
 # ONtime, OFFtime:
-#   光源のON/OFF時間を指定
-#   例: ONtime = 10, OFFtime = 20
-#   デフォルトは7時にON、23時にOFF
+# lighting span. default: ONtime = 7, OFFtime = 23
 # 
-# StartTime, EndTime: 
-#   測定開始時間・終了時間を指定
-#   例: "150000" (15:00:00の場合)
+# StartTime, EndTime: chr "150000" (15:00:00)
+
+# Future prospect
+# read data from cloud drive
 
 # A: chamA-F @419
 #   ch1 = chamF, ch2 = chamE, ... ch6 = chamA 
@@ -38,7 +32,7 @@ library(tidyr)
 library(data.table)
 library(lubridate)
 
-# キャリブレーションシートの読み込み
+# read calibration data
 Calb <- 
   paste0(LogPath, "CalbGL.csv") %>%
   fread %>%
@@ -47,19 +41,21 @@ Calb <-
   unlist
 
 
-# 警告設定を緩和
-# tidyr::separateで多く出るので
+# suppress warning for tidyr::separate
 warn.value <- as.numeric(options("warn"))
 options(warn = -1)
 
 
-# 時間に応じて昼夜を追加する関数
+# distinguish day and night time from hour
 DNdet <- function(Hour, ONtime, OFFtime){
   Hour <- as.numeric(Hour)
   ifelse(test = (Hour >= ONtime && Hour < OFFtime) , yes = "Day", no = "Night")
 }
 
-# データハンドリング
+#################
+# data handling #
+#################
+
 AllDataDirs <-
   dir(paste0(LogPath, ID, "/")) %>%
   as.numeric
@@ -81,13 +77,13 @@ inRanges <-
     Used <-
       AllDataDirs[(inRanges[1] - 1):inRanges[2]]
     DataDirs <-
-      AllDataDirs[(inRanges[1] - 1):inRanges[2]] %>% # minの１つ前までにデータが含まれる
+      AllDataDirs[(inRanges[1] - 1):inRanges[2]] %>% # contains (min - 1 ~ max)
       paste0(LogPath, ID, "/", ., "/") %>%
       dir(full.names = TRUE)
     rm(Used)
   }
 
-# 指定期間のログデータがない場合の処理。
+# if there is no data in the target span
 if(length(DataDirs) == 0){
   print("no CSV files detected")
   break
@@ -100,12 +96,10 @@ selected_ch <- paste0("ch", ch)
 Raw <-
   lapply(1:length(DataDirs), function(i){
     if (class(try(fread(input = DataDirs[i], skip = 33), silent = TRUE)) == "try-error") {
-      # fread関数がエラーになった場合はループ抜け
-      # データ数が１のときとかにエラーが出るので、例外処理
+      # if error in fread(), break loop
       data.frame(Time = "NA", val = NA) %>%
         return
     } else {
-      # エラーに該当しなければファイルの読み込みを進行する
       temp <-
         fread(input = DataDirs[i], skip = 33)
                 
@@ -122,11 +116,11 @@ Raw <-
   separate(col = time, into = c("Hour", "Min", "Sec"), sep = ":") %>%
   mutate(LightOn = ONtime, LightOff = OFFtime,
          Time = ymd_hms(Time, locale="C", tz="Asia/Tokyo"),
-         DayNight = Vectorize(DNdet)(Hour, LightOn, LightOff), # 昼夜表示
-         val= (val - Calb[2]) / Calb[1] # 校正
+         DayNight = Vectorize(DNdet)(Hour, LightOn, LightOff), # day night
+         val= (val - Calb[2]) / Calb[1] # calbrate
         ) %>%
   select(-starts_with("Light")) %>%
-  # 処理開始、終了時間でカットする
+  # extract data between (StartTime and EndTime)
   filter(Time > ymd_hms(paste0(StartDay, " ", StartTime, tz = "Asia/Tokyo")),
          Time < ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo")) %>%
   mutate(ID = ID, ch = ch,
@@ -135,7 +129,7 @@ Raw <-
 
   Raw %>%
     {
-    # 1時間平均
+    # hourly
     meanHour <<-
       mutate(., IDs = paste0(Day, " ", Hour)) %>%
       group_by(DayNight, ID, ch, start, end, IDs) %>%
@@ -143,19 +137,19 @@ Raw <-
       ungroup %>%
       mutate(Time = paste0(IDs, "-00-00"),
              Time = ymd_hms(Time)) 
-    # 1日平均
+    # daily
     meanDay <<-
       group_by(., ID, ch, start, end, Day, DayNight) %>%
       summarise(value = mean(val), SD = sd(val)) %>%
       ungroup %>%
       mutate(Time = ymd(Day))
-    # 期間平均
+    # all span
     meanAll <<-
       group_by(., ID, ch, start, end, DayNight) %>%
       summarise(value = mean(val), SD = sd(val))
     }
   
-  options(warn = warn.value) # 警告設定を元に戻す
+  options(warn = warn.value) # reset warning
   
   list(Raw = Raw, Hourly = meanHour, Daily = meanDay, Span = meanAll) %>%
     return
@@ -164,9 +158,6 @@ Raw <-
 
 
 
-# 要求パッケージなど。
-# エラーが出たらここらへんをインストールしてください。
-# だめなら村上まで。
 
 # > sessionInfo()
 # R version 3.1.2 (2014-10-31)
