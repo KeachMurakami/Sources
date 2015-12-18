@@ -132,7 +132,7 @@ Raw <-
   mutate(ID = ID, ch = ch,
          start = ymd_hms(paste0(StartDay, " ", StartTime)),
          end = ymd_hms(paste0(EndDay, " ", EndTime)))
-  
+
   Raw %>%
     {
     # 1時間平均
