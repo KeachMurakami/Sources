@@ -1,5 +1,5 @@
 readGL <- function(ID, ch, StartDay, EndDay,
-                   StartTime = 150000, EndTime = 150000,
+                   StartTime = "150000", EndTime = "150000",
                    ONtime = 7, OFFtime = 23){  
 # 最初にこれだけは設定必要。
 # ログのパスの指定
@@ -36,7 +36,7 @@ Calb <-
 # 
 # StartTime, EndTime: 
 #   測定開始時間・終了時間を指定
-#   例: 150000 (15:00:00の場合)
+#   例: "150000" (15:00:00の場合)
 
 
 
@@ -105,7 +105,7 @@ StartFolder <- dirname(DataDirs)[1]
 
 selected_ch <- paste0("ch", ch)
 
-data <-
+Raw <-
   lapply(1:length(DataDirs), function(i){
 ############ 
 #     if (class(try(fread(input = DataDirs[i]), silent = TRUE)) == "try-error") {
@@ -162,43 +162,40 @@ data <-
          DayNight = Vectorize(DNdet)(Hour, LightOn, LightOff), # 昼夜表示
          val= (val - Calb[2]) / Calb[1] # 校正
         ) %>%
-  select(-starts_with("Light"))
-
-# 処理開始、終了時間でカットする
-data %>%
-  filter(Time > ymd_hms(paste0(StartDay, " ", StartTime), tz = "Asia/Tokyo"),
+  select(-starts_with("Light")) %>%
+  # 処理開始、終了時間でカットする
+  filter(Time > ymd_hms(paste0(StartDay, " ", StartTime, tz = "Asia/Tokyo"),
          Time < ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo")) %>%
   mutate(ID = ID, ch = ch,
          start = ymd_hms(paste0(StartDay, " ", StartTime)),
-         end = ymd_hms(paste0(EndDay, " ", EndTime))) %>%
-  {
-  # 1時間平均
-  meanHour <<-
-    mutate(., IDs = paste0(Day, " ", Hour)) %>%
-    group_by(DayNight, ID, ch, start, end, IDs) %>%
-    summarise(value = mean(val), SD = sd(val)) %>%
-    ungroup %>%
-    mutate(Time = paste0(IDs, "-00-00"),
-           Time = ymd_hms(Time)) 
-  # 1日平均
-  meanDay <<-
-    group_by(., ID, ch, start, end, Day, DayNight) %>%
-    summarise(value = mean(val), SD = sd(val)) %>%
-    ungroup %>%
-    mutate(Time = ymd(Day))
-  # 期間平均
-  meanAll <<-
-    group_by(., ID, ch, start, end, DayNight) %>%
-    summarise(value = mean(val), SD = sd(val))
-  }
-
-options(warn = warn.value) # 警告設定を元に戻す
-
-data %>%
-  mutate(value = val) %>%
-  select(-val) %>%
-  list(Raw = ., Hourly = meanHour, Daily = meanDay, Span = meanAll) %>%
-  return
+         end = ymd_hms(paste0(EndDay, " ", EndTime)))
+  
+  Raw %>%
+    {
+    # 1時間平均
+    meanHour <<-
+      mutate(., IDs = paste0(Day, " ", Hour)) %>%
+      group_by(DayNight, ID, ch, start, end, IDs) %>%
+      summarise(value = mean(val), SD = sd(val)) %>%
+      ungroup %>%
+      mutate(Time = paste0(IDs, "-00-00"),
+             Time = ymd_hms(Time)) 
+    # 1日平均
+    meanDay <<-
+      group_by(., ID, ch, start, end, Day, DayNight) %>%
+      summarise(value = mean(val), SD = sd(val)) %>%
+      ungroup %>%
+      mutate(Time = ymd(Day))
+    # 期間平均
+    meanAll <<-
+      group_by(., ID, ch, start, end, DayNight) %>%
+      summarise(value = mean(val), SD = sd(val))
+    }
+  
+  options(warn = warn.value) # 警告設定を元に戻す
+  
+  list(Raw = Raw, Hourly = meanHour, Daily = meanDay, Span = meanAll) %>%
+    return
 
 }
 
