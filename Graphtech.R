@@ -54,10 +54,10 @@ options(warn = -1)
 
 
 # 時間に応じて昼夜を追加する関数
-  DNdet <- function(Hour, ONtime, OFFtime){
-    Hour <- as.numeric(Hour)
-    ifelse(test = (Hour >= ONtime && Hour < OFFtime) , yes = "Day", no = "Night")
-  }
+DNdet <- function(Hour, ONtime, OFFtime){
+  Hour <- as.numeric(Hour)
+  ifelse(test = (Hour >= ONtime && Hour < OFFtime) , yes = "Day", no = "Night")
+}
 
 # データハンドリング
 AllDataDirs <-
@@ -127,8 +127,8 @@ Raw <-
         ) %>%
   select(-starts_with("Light")) %>%
   # 処理開始、終了時間でカットする
-  filter(Time > ymd_hms(paste0(StartDay, " ", StartTime, tz = "Asia/Tokyo"),
-         Time < ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo"))) %>%
+  filter(Time > ymd_hms(paste0(StartDay, " ", StartTime, tz = "Asia/Tokyo")),
+         Time < ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo")) %>%
   mutate(ID = ID, ch = ch,
          start = ymd_hms(paste0(StartDay, " ", StartTime)),
          end = ymd_hms(paste0(EndDay, " ", EndTime)))
