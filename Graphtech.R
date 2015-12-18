@@ -128,7 +128,7 @@ Raw <-
   select(-starts_with("Light")) %>%
   # 処理開始、終了時間でカットする
   filter(Time > ymd_hms(paste0(StartDay, " ", StartTime, tz = "Asia/Tokyo"),
-         Time < ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo")) %>%
+         Time < ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo"))) %>%
   mutate(ID = ID, ch = ch,
          start = ymd_hms(paste0(StartDay, " ", StartTime)),
          end = ymd_hms(paste0(EndDay, " ", EndTime)))
