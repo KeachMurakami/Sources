@@ -121,7 +121,7 @@ readGL <- function(ID, ch, StartDay, EndDay,
     separate(col = Time, into = c("Day", "time"), sep = " ", remove = F) %>%  
     separate(col = time, into = c("Hour", "Min", "Sec"), sep = ":") %>%
     mutate(LightOn = ONtime, LightOff = OFFtime,
-           Time = ymd_hms(Time, locale="C", tz="Asia/Tokyo"),
+           Time = ymd_hms(Time, tz="Asia/Tokyo"),
            DayNight = Vectorize(DNdet)(Hour, LightOn, LightOff), # day night
            val= (val - Calb[2]) / Calb[1] # calbrate
     ) %>%

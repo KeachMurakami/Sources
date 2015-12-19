@@ -117,7 +117,7 @@ readMCH <- function(ID, StartDay, EndDay,
     separate(col = Time, into = c("Hour", "Min", "Sec"), sep = ":", remove = F) %>%
     mutate(Time = paste0(Day, " ", Time),
            LightOn = ONtime, LightOff = OFFtime,
-           Time = ymd_hms(Time, locale="C", tz="Asia/Tokyo"),
+           Time = ymd_hms(Time, tz="Asia/Tokyo"),
            DayNight = Vectorize(DNdet)(Hour, LightOn, LightOff), # day night
            Hum = (Hum - Calb[4]) / Calb[1], # calbrate
            Temp = (Temp - Calb[5]) / Calb[2], # calbrate
