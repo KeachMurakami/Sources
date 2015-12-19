@@ -27,9 +27,10 @@ readMCH <- function(ID, StartDay, EndDay,
   
   # read calibration data
   Calb <- 
-    paste0(LogPath, "CalbMCH.csv") %>%
+    dir(LogPath, pattern = "Calb", full.names = T) %>%
     fread %>%
-    filter(MCH_ID == ID) %>%
+    select(everything(), LoggerIDs = 1) %>%
+    filter(LoggerIDs == ID) %>%
     select(starts_with("Slope"), starts_with("Intercept")) %>%
     unlist
   
@@ -44,44 +45,55 @@ readMCH <- function(ID, StartDay, EndDay,
     ifelse(test = (Hour >= ONtime && Hour < OFFtime) , yes = "Day", no = "Night")
   }
   
+  # data folder path maker
+  DataPath <- function(ID){
+    paste0(LogPath, "No", formatC(ID, digits = 1, flag = "0"), "/")
+  }
+  
   #################
   # data handling #
   #################
-
+  
   AllDataDirs <-
-    dir(paste0(LogPath, "No", formatC(ID, digits = 1, flag = "0"), "/")) %>%
+    DataPath(ID) %>%
+    dir %>%
     as.numeric
   
+  # three cases can be for reading
+  # 1) measurement is started during logging (StartDay != any(AllDataDirs))
+  # 2) measurement is started with logging start (StartDay == one(AllDataDirs))
+  # 3) no data files
+  
   inRanges <-
-    ((AllDataDirs > StartDay) & (AllDataDirs <= EndDay)) %>%
+    between(AllDataDirs, StartDay, EndDay) %>%  
     which %>%
     range
   
   if(is.infinite(inRanges[1])) {
     DataDirs <-
       (AllDataDirs < StartDay) %>%
-      which %>%
-      max %>%
+      sum %>%
       AllDataDirs[.] %>%
-      paste0(LogPath, "No", formatC(ID, digits = 1, flag = "0"), "/", ., "/") %>%
+      paste0(DataPath(ID), ., "/") %>%
       dir(full.names = TRUE)
   } else {
     Used <-
       AllDataDirs[(inRanges[1] - 1):inRanges[2]]
     DataDirs <-
       AllDataDirs[(inRanges[1] - 1):inRanges[2]] %>% # contains (min - 1 ~ max)
-      paste0(LogPath, "No", formatC(ID, digits = 1, flag = "0"), "/", ., "/") %>%
+      paste0(DataPath(ID), ., "/") %>%
       dir(full.names = TRUE)
     rm(Used)
   }
   
   # if there is no data in the target span
   if(length(DataDirs) == 0){
-    print("no CSV files detected")
+    print("no data files detected")
     break
   }
   
-  StartFolder <- dirname(DataDirs)[1]
+  CutFrom <- ymd_hms(paste0(StartDay, " ", StartTime), tz = "Asia/Tokyo")
+  CutTill <- ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo")
   
   Raw <-
     lapply(1:length(DataDirs), function(i){
@@ -112,12 +124,8 @@ readMCH <- function(ID, StartDay, EndDay,
            CO2 = (CO2 - Calb[6]) / Calb[3] # calbrate
     ) %>%
     select(-starts_with("Light")) %>%
-    # extract data between (StartTime and EndTime)
-    filter(Time > ymd_hms(paste0(StartDay, " ", StartTime), tz = "Asia/Tokyo"),
-           Time < ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo")) %>%
-    mutate(ID = ID,
-           start = ymd_hms(paste0(StartDay, " ", StartTime)),
-           end = ymd_hms(paste0(EndDay, " ", EndTime)))
+    filter(between(Time, CutFrom, CutTill)) %>% # extract data between (StartTime and EndTime)
+    mutate(ID = ID, start = CutFrom, end = CutTill) # memos for subsequent data analysis
   
   Raw %>%
 {

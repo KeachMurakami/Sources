@@ -34,12 +34,12 @@ readGL <- function(ID, ch, StartDay, EndDay,
   
   # read calibration data
   Calb <- 
-    paste0(LogPath, "CalbGL.csv") %>%
+    dir(LogPath, pattern = "Calb", full.names = T) %>%
     fread %>%
-    filter(GL_ID == ID, GL_ch == ch) %>%
-    select(Slope, Intercept) %>%
+    select(everything(), LoggerIDs = 1) %>%
+    filter(LoggerIDs == ID, GL_ch == ch) %>%
+    select(starts_with("Slope"), starts_with("Intercept")) %>%
     unlist
-  
   
   # suppress warning for tidyr::separate
   warn.value <- as.numeric(options("warn"))
@@ -52,46 +52,52 @@ readGL <- function(ID, ch, StartDay, EndDay,
     ifelse(test = (Hour >= ONtime && Hour < OFFtime) , yes = "Day", no = "Night")
   }
   
+  # data folder path maker
+  DataPath <- function(ID){
+    paste0(LogPath, ID, "/")
+  }
+  
   #################
   # data handling #
   #################
   
   AllDataDirs <-
-    dir(paste0(LogPath, ID, "/")) %>%
+    DataPath(ID) %>%
+    dir %>%
     as.numeric
   
+  
   inRanges <-
-    ((AllDataDirs > StartDay) & (AllDataDirs <= EndDay)) %>%
+    between(AllDataDirs, StartDay, EndDay) %>%  
     which %>%
     range
   
   if(is.infinite(inRanges[1])) {
     DataDirs <-
       (AllDataDirs < StartDay) %>%
-      which %>%
-      max %>%
+      sum %>%
       AllDataDirs[.] %>%
-      paste0(LogPath, ID, "/", ., "/") %>%
+      paste0(DataPath(ID), ., "/") %>%
       dir(full.names = TRUE)
   } else {
     Used <-
       AllDataDirs[(inRanges[1] - 1):inRanges[2]]
     DataDirs <-
       AllDataDirs[(inRanges[1] - 1):inRanges[2]] %>% # contains (min - 1 ~ max)
-      paste0(LogPath, ID, "/", ., "/") %>%
+      paste0(DataPath(ID), ., "/") %>%
       dir(full.names = TRUE)
     rm(Used)
   }
   
   # if there is no data in the target span
   if(length(DataDirs) == 0){
-    print("no CSV files detected")
+    print("no data files detected")
     break
   }
   
-  StartFolder <- dirname(DataDirs)[1]
-  
   selected_ch <- paste0("ch", ch)
+  CutFrom <- ymd_hms(paste0(StartDay, " ", StartTime), tz = "Asia/Tokyo")
+  CutTill <- ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo")
   
   Raw <-
     lapply(1:length(DataDirs), function(i){
@@ -120,12 +126,8 @@ readGL <- function(ID, ch, StartDay, EndDay,
            val= (val - Calb[2]) / Calb[1] # calbrate
     ) %>%
     select(-starts_with("Light")) %>%
-    # extract data between (StartTime and EndTime)
-    filter(Time > ymd_hms(paste0(StartDay, " ", StartTime, tz = "Asia/Tokyo")),
-           Time < ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo")) %>%
-    mutate(ID = ID, ch = ch,
-           start = ymd_hms(paste0(StartDay, " ", StartTime)),
-           end = ymd_hms(paste0(EndDay, " ", EndTime)))
+    filter(between(Time, CutFrom, CutTill)) %>% # extract data between (StartTime and EndTime)
+    mutate(ID = ID, ch = ch, start = CutFrom, end = CutTill) # memos for subsequent data analysis
   
   Raw %>%
 {
