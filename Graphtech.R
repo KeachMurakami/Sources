@@ -2,77 +2,77 @@ readGL <- function(ID, ch, StartDay, EndDay,
                    StartTime = "150000", EndTime = "150000",
                    ONtime = 7, OFFtime = 23,
                    LogPath = "~/Dropbox/GL_log/"){  
-
-
-# ID: chr
-#   logger's ID
-#
-# ch: num
-#   channel
-# 
-# StartDay, EndDay: num 150911 (2015.9.11.)
-# 
-# ONtime, OFFtime:
-# lighting span. default: ONtime = 7, OFFtime = 23
-# 
-# StartTime, EndTime: chr "150000" (15:00:00)
-
-# Future prospect
-# read data from cloud drive
-
-# A: chamA-F @419
-#   ch1 = chamF, ch2 = chamE, ... ch6 = chamA 
-# B: chamK-N @420
-#   ch1 = chamK, ch2 = chamL, ... ch4 = chamN 
-# D: chamG-J @420
-#   ch1 = chamJ, ch2 = chamI, ... ch3 = chamG 
-
-library(ggplot2)
-library(tidyr)
-library(data.table)
-library(lubridate)
-
-# read calibration data
-Calb <- 
-  paste0(LogPath, "CalbGL.csv") %>%
-  fread %>%
-  filter(GL_ID == ID, GL_ch == ch) %>%
-  select(Slope, Intercept) %>%
-  unlist
-
-
-# suppress warning for tidyr::separate
-warn.value <- as.numeric(options("warn"))
-options(warn = -1)
-
-
-# distinguish day and night time from hour
-DNdet <- function(Hour, ONtime, OFFtime){
-  Hour <- as.numeric(Hour)
-  ifelse(test = (Hour >= ONtime && Hour < OFFtime) , yes = "Day", no = "Night")
-}
-
-#################
-# data handling #
-#################
-
-AllDataDirs <-
-  dir(paste0(LogPath, ID, "/")) %>%
-  as.numeric
-
-inRanges <-
-  ((AllDataDirs > StartDay) & (AllDataDirs <= EndDay)) %>%
+  
+  
+  # ID: chr
+  #   logger's ID
+  #
+  # ch: num
+  #   channel
+  # 
+  # StartDay, EndDay: num 150911 (2015.9.11.)
+  # 
+  # ONtime, OFFtime:
+  # lighting span. default: ONtime = 7, OFFtime = 23
+  # 
+  # StartTime, EndTime: chr "150000" (15:00:00)
+  
+  # Future prospect
+  # read data from cloud drive
+  
+  # A: chamA-F @419
+  #   ch1 = chamF, ch2 = chamE, ... ch6 = chamA 
+  # B: chamK-N @420
+  #   ch1 = chamK, ch2 = chamL, ... ch4 = chamN 
+  # D: chamG-J @420
+  #   ch1 = chamJ, ch2 = chamI, ... ch3 = chamG 
+  
+  library(ggplot2)
+  library(tidyr)
+  library(data.table)
+  library(lubridate)
+  
+  # read calibration data
+  Calb <- 
+    paste0(LogPath, "CalbGL.csv") %>%
+    fread %>%
+    filter(GL_ID == ID, GL_ch == ch) %>%
+    select(Slope, Intercept) %>%
+    unlist
+  
+  
+  # suppress warning for tidyr::separate
+  warn.value <- as.numeric(options("warn"))
+  options(warn = -1)
+  
+  
+  # distinguish day and night time from hour
+  DNdet <- function(Hour, ONtime, OFFtime){
+    Hour <- as.numeric(Hour)
+    ifelse(test = (Hour >= ONtime && Hour < OFFtime) , yes = "Day", no = "Night")
+  }
+  
+  #################
+  # data handling #
+  #################
+  
+  AllDataDirs <-
+    dir(paste0(LogPath, ID, "/")) %>%
+    as.numeric
+  
+  inRanges <-
+    ((AllDataDirs > StartDay) & (AllDataDirs <= EndDay)) %>%
     which %>%
     range
-
+  
   if(is.infinite(inRanges[1])) {
     DataDirs <-
-     (AllDataDirs < StartDay) %>%
-       which %>%
-       max %>%
-       AllDataDirs[.] %>%
-       paste0(LogPath, ID, "/", ., "/") %>%
-       dir(full.names = TRUE)
+      (AllDataDirs < StartDay) %>%
+      which %>%
+      max %>%
+      AllDataDirs[.] %>%
+      paste0(LogPath, ID, "/", ., "/") %>%
+      dir(full.names = TRUE)
   } else {
     Used <-
       AllDataDirs[(inRanges[1] - 1):inRanges[2]]
@@ -82,82 +82,79 @@ inRanges <-
       dir(full.names = TRUE)
     rm(Used)
   }
-
-# if there is no data in the target span
-if(length(DataDirs) == 0){
-  print("no CSV files detected")
-  break
-}
-
-StartFolder <- dirname(DataDirs)[1]
-
-selected_ch <- paste0("ch", ch)
-
-Raw <-
-  lapply(1:length(DataDirs), function(i){
-    if (class(try(fread(input = DataDirs[i], skip = 33), silent = TRUE)) == "try-error") {
-      # if error in fread(), break loop
-      data.frame(Time = "NA", val = NA) %>%
-        return
-    } else {
-      temp <-
-        fread(input = DataDirs[i], skip = 33)
-                
-      temp %>%
-        setnames(c("No", "Time", "ms", paste0("ch", 1:(dim(temp)[2] - 3)))) %>%
-        select_("Time", val = selected_ch) %>%
-        mutate(val = extract_numeric(val)) %>%
-        return
-    }
-  }) %>%
-  rbind_all %>%
-  na.omit %>%
-  separate(col = Time, into = c("Day", "time"), sep = " ", remove = F) %>%  
-  separate(col = time, into = c("Hour", "Min", "Sec"), sep = ":") %>%
-  mutate(LightOn = ONtime, LightOff = OFFtime,
-         Time = ymd_hms(Time, locale="C", tz="Asia/Tokyo"),
-         DayNight = Vectorize(DNdet)(Hour, LightOn, LightOff), # day night
-         val= (val - Calb[2]) / Calb[1] # calbrate
-        ) %>%
-  select(-starts_with("Light")) %>%
-  # extract data between (StartTime and EndTime)
-  filter(Time > ymd_hms(paste0(StartDay, " ", StartTime, tz = "Asia/Tokyo")),
-         Time < ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo")) %>%
-  mutate(ID = ID, ch = ch,
-         start = ymd_hms(paste0(StartDay, " ", StartTime)),
-         end = ymd_hms(paste0(EndDay, " ", EndTime)))
-
+  
+  # if there is no data in the target span
+  if(length(DataDirs) == 0){
+    print("no CSV files detected")
+    break
+  }
+  
+  StartFolder <- dirname(DataDirs)[1]
+  
+  selected_ch <- paste0("ch", ch)
+  
+  Raw <-
+    lapply(1:length(DataDirs), function(i){
+      if (class(try(fread(input = DataDirs[i], skip = 33), silent = TRUE)) == "try-error") {
+        # if error in fread(), break loop
+        data.frame(Time = "NA", val = NA) %>%
+          return
+      } else {
+        temp <-
+          fread(input = DataDirs[i], skip = 33)
+        
+        temp %>%
+          setnames(c("No", "Time", "ms", paste0("ch", 1:(dim(temp)[2] - 3)))) %>%
+          select_("Time", val = selected_ch) %>%
+          mutate(val = extract_numeric(val)) %>%
+          return
+      }
+    }) %>%
+    rbind_all %>%
+    na.omit %>%
+    separate(col = Time, into = c("Day", "time"), sep = " ", remove = F) %>%  
+    separate(col = time, into = c("Hour", "Min", "Sec"), sep = ":") %>%
+    mutate(LightOn = ONtime, LightOff = OFFtime,
+           Time = ymd_hms(Time, locale="C", tz="Asia/Tokyo"),
+           DayNight = Vectorize(DNdet)(Hour, LightOn, LightOff), # day night
+           val= (val - Calb[2]) / Calb[1] # calbrate
+    ) %>%
+    select(-starts_with("Light")) %>%
+    # extract data between (StartTime and EndTime)
+    filter(Time > ymd_hms(paste0(StartDay, " ", StartTime, tz = "Asia/Tokyo")),
+           Time < ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo")) %>%
+    mutate(ID = ID, ch = ch,
+           start = ymd_hms(paste0(StartDay, " ", StartTime)),
+           end = ymd_hms(paste0(EndDay, " ", EndTime)))
+  
   Raw %>%
-    {
-    # hourly
-    meanHour <<-
-      mutate(., IDs = paste0(Day, " ", Hour)) %>%
-      group_by(DayNight, ID, ch, start, end, IDs) %>%
-      summarise(value = mean(val), SD = sd(val)) %>%
-      ungroup %>%
-      mutate(Time = paste0(IDs, "-00-00"),
-             Time = ymd_hms(Time)) 
-    # daily
-    meanDay <<-
-      group_by(., ID, ch, start, end, Day, DayNight) %>%
-      summarise(value = mean(val), SD = sd(val)) %>%
-      ungroup %>%
-      mutate(Time = ymd(Day))
-    # all span
-    meanAll <<-
-      group_by(., ID, ch, start, end, DayNight) %>%
-      summarise(value = mean(val), SD = sd(val))
-    }
-  
-  options(warn = warn.value) # reset warning
-  
-  list(Raw = Raw, Hourly = meanHour, Daily = meanDay, Span = meanAll) %>%
-    return
-
+{
+  # hourly
+  meanHour <<-
+    mutate(., IDs = paste0(Day, " ", Hour)) %>%
+    group_by(DayNight, ID, ch, start, end, IDs) %>%
+    summarise(value = mean(val), SD = sd(val)) %>%
+    ungroup %>%
+    mutate(Time = paste0(IDs, "-00-00"),
+           Time = ymd_hms(Time)) 
+  # daily
+  meanDay <<-
+    group_by(., ID, ch, start, end, Day, DayNight) %>%
+    summarise(value = mean(val), SD = sd(val)) %>%
+    ungroup %>%
+    mutate(Time = ymd(Day))
+  # all span
+  meanAll <<-
+    group_by(., ID, ch, start, end, DayNight) %>%
+    summarise(value = mean(val), SD = sd(val))
 }
 
+options(warn = warn.value) # reset warning
 
+list(Raw = Raw, Hourly = meanHour, Daily = meanDay, Span = meanAll) %>%
+  return
 
+}
 
 # > sessionInfo()
 # R version 3.1.2 (2014-10-31)
@@ -183,4 +180,4 @@ Raw <-
 # [16] lattice_0.20-33   lazyeval_0.1.10   LearnBayes_2.15   Matrix_1.2-2      memoise_0.2.1    
 # [21] munsell_0.4.2     nlme_3.1-122      parallel_3.1.2    proto_0.3-10      R6_2.1.1         
 # [26] Rcpp_0.12.2       reshape_0.8.5     scales_0.3.0      sp_1.1-1          spdep_0.5-88     
-# [31] splines_3.1.2     stringi_1.0-1     tools_3.1.2      
+# [31] splines_3.1.2     stringi_1.0-1     tools_3.1.2
