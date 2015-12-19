@@ -123,7 +123,7 @@ readGL <- function(ID, ch, StartDay, EndDay,
     mutate(LightOn = ONtime, LightOff = OFFtime,
            Time = ymd_hms(Time, tz="Asia/Tokyo"),
            DayNight = Vectorize(DNdet)(Hour, LightOn, LightOff), # day night
-           val= (val - Calb[2]) / Calb[1] # calbrate
+           Temp= (val - Calb[2]) / Calb[1] # calbrate
     ) %>%
     select(-starts_with("Light")) %>%
     filter(between(Time, CutFrom, CutTill)) %>% # extract data between (StartTime and EndTime)
@@ -135,20 +135,20 @@ readGL <- function(ID, ch, StartDay, EndDay,
   meanHour <<-
     mutate(., IDs = paste0(Day, " ", Hour)) %>%
     group_by(DayNight, ID, ch, start, end, IDs) %>%
-    summarise(value = mean(val), SD = sd(val)) %>%
+    summarise(MeanTemp = mean(Temp), SDTemp = sd(Temp)) %>%
     ungroup %>%
     mutate(Time = paste0(IDs, "-00-00"),
            Time = ymd_hms(Time)) 
   # daily
   meanDay <<-
     group_by(., ID, ch, start, end, Day, DayNight) %>%
-    summarise(value = mean(val), SD = sd(val)) %>%
+    summarise(MeanTemp = mean(Temp), SDTemp = sd(Temp)) %>%
     ungroup %>%
     mutate(Time = ymd(Day))
   # all span
   meanAll <<-
     group_by(., ID, ch, start, end, DayNight) %>%
-    summarise(value = mean(val), SD = sd(val))
+    summarise(MeanTemp = mean(Temp), SDTemp = sd(Temp))
 }
 
 options(warn = warn.value) # reset warning
