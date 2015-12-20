@@ -132,30 +132,34 @@ readGL <- function(ID, ch, StartDay, EndDay,
   Raw %>%
 {
   # hourly
-  meanHour <<-
-    mutate(., IDs = paste0(Day, " ", Hour)) %>%
-    group_by(DayNight, ID, ch, start, end, IDs) %>%
+  Hourly <<-
+    mutate(., DayHour = paste0(Day, " ", Hour)) %>%
+    group_by(ID, ch, DayNight, Day, Hour, DayHour) %>%
     summarise(MeanTemp = mean(Temp), SDTemp = sd(Temp)) %>%
     ungroup %>%
-    mutate(Time = paste0(IDs, "-00-00"),
+    mutate(Time = paste0(DayHour, "-00-00"),
            Time = ymd_hms(Time)) 
   # daily
-  meanDay <<-
-    group_by(., ID, ch, start, end, Day, DayNight) %>%
+  Daily <<-
+    group_by(., ID, ch, DayNight, Day) %>%
     summarise(MeanTemp = mean(Temp), SDTemp = sd(Temp)) %>%
     ungroup %>%
     mutate(Time = ymd(Day))
   # all span
-  meanAll <<-
-    group_by(., ID, ch, start, end, DayNight) %>%
-    summarise(MeanTemp = mean(Temp), SDTemp = sd(Temp))
+  FullSpan <<-
+    group_by(., ID, ch, DayNight) %>%
+    summarise(MeanTemp = mean(Temp), SDTemp = sd(Temp)) %>%
+    ungroup
 }
 
 options(warn = warn.value) # reset warning
 
-list(Raw = Raw, Hourly = meanHour, Daily = meanDay, Span = meanAll) %>%
+Raw %>%
+  select(ID, ch, DayNight, Temp, Time) %>%
+  list(Raw = ., Hourly = Hourly, Daily = Daily, Span = FullSpan,
+       inputs = list(ID = ID, ch = ch, StartDay = StartDay, EndDay = EndDay,
+                     StartTime = StartTime, EndTime = EndTime, ONtime, OFFtime, LogPath)) %>%
   return
-
 }
 
 # > sessionInfo()

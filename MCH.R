@@ -130,36 +130,40 @@ readMCH <- function(ID, StartDay, EndDay,
   Raw %>%
 {
   # hourly
-  meanHour <<-
-    mutate(., IDs = paste0(Day, " ", Hour)) %>%
-    group_by(DayNight, ID, start, end, IDs) %>%
+  Hourly <<-
+    mutate(., DayHour = paste0(Day, " ", Hour)) %>%
+    group_by(ID, DayNight, Day, Hour, DayHour) %>%
     summarise(MeanHum = mean(Hum), SDHum = sd(Hum),
               MeanTemp = mean(Temp), SDTemp = sd(Temp),
               MeanCO2 = mean(CO2), SDCO2 = sd(CO2)) %>%
     ungroup %>%
-    mutate(Time = paste0(IDs, "-00-00"),
+    mutate(Time = paste0(DayHour, "-00-00"),
            Time = ymd_hms(Time)) 
   # daily
-  meanDay <<-
-    group_by(., ID, start, end, Day, DayNight) %>%
+  Daily <<-
+    group_by(., ID, DayNight, Day) %>%
     summarise(MeanHum = mean(Hum), SDHum = sd(Hum),
               MeanTemp = mean(Temp), SDTemp = sd(Temp),
               MeanCO2 = mean(CO2), SDCO2 = sd(CO2)) %>%
     ungroup %>%
     mutate(Time = ymd(Day))
   # all span
-  meanAll <<-
-    group_by(., ID, start, end, DayNight) %>%
+  FullSpan <<-
+    group_by(., ID, DayNight) %>%
     summarise(MeanHum = mean(Hum), SDHum = sd(Hum),
               MeanTemp = mean(Temp), SDTemp = sd(Temp),
-              MeanCO2 = mean(CO2), SDCO2 = sd(CO2))    
+              MeanCO2 = mean(CO2), SDCO2 = sd(CO2)) %>%
+    ungroup
 }
 
 options(warn = warn.value) # reset warning
 
-list(Raw = Raw, Hourly = meanHour, Daily = meanDay, Span = meanAll) %>%
+Raw %>%
+  select(ID, DayNight, Hum, CO2, Temp, Time) %>%
+  list(Raw = ., Hourly = Hourly, Daily = Daily, Span = FullSpan,
+       inputs = list(ID = ID, StartDay = StartDay, EndDay = EndDay,
+                     StartTime = StartTime, EndTime = EndTime, ONtime, OFFtime, LogPath)) %>%
   return
-
 }
 
 # > sessionInfo()
