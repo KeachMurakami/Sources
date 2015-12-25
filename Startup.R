@@ -23,8 +23,7 @@ library(scales)
 library(pforeach)
 library(devtools)
 
-OFFline <- class(try(source("http://www7b.biglobe.ne.jp/~homunculus/Rsource/tameshi.txt"), silent = T)) == "try-error"
-  #class(try(source_url(url = "https://raw.githubusercontent.com/KeachMurakami/Sources/master/NetworkTest.txt")), silent = T)) == "try-error"
+OFFline <- class(try(source_url(url = "https://raw.githubusercontent.com/KeachMurakami/Sources/master/NetworkTest.txt"), silent = T)) == "try-error"
 OSMac <- .Platform$OS.type == "unix"
 if(OSMac){
   # startups for Mac
