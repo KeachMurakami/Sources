@@ -23,11 +23,10 @@ library(scales)
 library(pforeach)
 library(devtools)
 
-OFFline <- 
-  class(try(source("http://www7b.biglobe.ne.jp/~homunculus/Rsource/tameshi.txt"), silent = T)) == "try-error"
+OFFline <- class(try(source("http://www7b.biglobe.ne.jp/~homunculus/Rsource/tameshi.txt"), silent = T)) == "try-error"
   #class(try(source_url(url = "https://raw.githubusercontent.com/KeachMurakami/Sources/master/NetworkTest.txt")), silent = T)) == "try-error"
-
-if(.Platform$OS.type == "unix"){
+OSMac <- .Platform$OS.type == "unix"
+if(OSMac){
   # startups for Mac
   system("defaults write org.R-project.R force.LANG en_US.UTF-8")
   # in order to avoid warning message
@@ -35,13 +34,12 @@ if(.Platform$OS.type == "unix"){
   home.dir <- function() setwd("/Users/keach/Dropbox/R")
   library(slackr)
   slackr_setup(config_file = ".slackr")
-  setwd(temp.dir)
 } else {
   # startups for Win
   home.dir <- function() setwd("C:/Users/KeachMurakami/Dropbox/R")
 }
 home.dir()
-}
+
 
 options(help_type="html")
 options(warn=1)
@@ -49,11 +47,16 @@ options(warn=1)
 # set working directory "/dropbox/R"
 
 if(OFFline){
-  source("./Sources/functions.R")
-  source("./Sources/labels.R")
-  cat("#####warning######\nThe functions are read from local files\nIt might not be the latest ver.")  
+  if(OSMac){
+    MyFunctions <- 
+      dir("~/GitHub/BeeLabR/Sources/", pattern = "R$", full.names = T)
+    MyFunctions[!str_detect(MyFunctions, pattern = "Startup")] %>%    
+      a_ply(., .fun = "source", .margins = 1)
+    cat("#####warning######\nThe functions are read from local files\nIt might not be the latest ver.")
 } else {
   library(RCurl)
   eval(parse(text = getURL("https://raw.githubusercontent.com/KeachMurakami/Sources/master/functions.R", ssl.verifypeer = FALSE)))
   eval(parse(text = getURL("https://raw.githubusercontent.com/KeachMurakami/Sources/master/labels.R", ssl.verifypeer = FALSE)))
 }
+
+setwd(temp.dir)
