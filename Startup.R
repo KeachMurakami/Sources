@@ -22,6 +22,7 @@ library(lubridate)
 library(scales)
 library(pforeach)
 library(devtools)
+library(tidyr)
 
 OFFline <- class(try(source_url(url = "https://raw.githubusercontent.com/KeachMurakami/Sources/master/NetworkTest.txt"), silent = T)) == "try-error"
 OSMac <- .Platform$OS.type == "unix"
