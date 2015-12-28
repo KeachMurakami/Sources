@@ -1,16 +1,35 @@
 # call my labels
 u_um <- function(Text) bquote(.(Text) ~ "[" * mu * "m]")
 u_cm2 <- function(Text) bquote(.(Text) ~ "[" * cm^2 * "]")
-u_g_m2 <- function(Text) bquote(.(Text) ~ "[g " * m^-2 * "]")
-u_mol_mol <- function(Text) bquote(.(Text) ~ "[mol " * mol^-1 * "]")
-u_umol_mol <- function(Text) bquote(.(Text) ~ "[" * mu * "mol" ~ mol^-1 * "]")
+u_g_m2 <- function(Text) bquote(.(Text) ~ "[g" * m^-2 * "]")
 u_mmol_m2 <- function(Text) bquote(.(Text) ~ "[mmol" ~ m^-2, "]")
-u_PFD <- function(Text) bquote(.(Text) ~ "[" * mu * "mol" ~ m^-2 ~ s^-1 * "]")
 u_SPFD <- function(Text) bquote(.(Text) ~ "[" * mu * "mol" ~ m^-2 ~ s^-1 ~ nm^-1 * "]")
 
-u_Pn <- expression(paste(italic(P)[n] ~ "[" * mu * "mol" * CO[2] ~ m^-2 ~ s^-1 * "]"))
-u_deltaPn <- expression(paste(Delta * italic(P)[n] ~ "[" * mu * "mol" * CO[2] ~ m^-2 ~ s^-1 * "]"))
-u_Pg <- expression(paste(italic(P)[g] ~ "[" * mu * "mol" * CO[2] ~ m^-2 ~ s^-1 * "]"))
-u_Gs <- expression(paste(italic(g)[s] ~ "[mol" * H[2] * "O" ~ m^-2 ~ s^-1 * "]"))
-u_Ci <- expression(paste(italic(C)[i] ~ "[Pa]"))
-u_Ca <- expression(paste(italic(C)[a] ~ "[Pa]"))
+u_flux <- function(Text, type){
+  variables <-
+    list(PFD = substitute(),
+         Pn = substitute(expr = italic(P)[n]),
+         Pg = substitute(expr = italic(P)[g]),
+         dPn = substitute(expr = Delta * italic(P)[n]),
+         Gs = substitute(expr = italic(G)[s]))
+  
+  if(type == 5){
+    return(bquote(.(Text) ~ .(variables[[type]]) ~ "[mol" ~ m^-2 ~ s^-1 * "]")) 
+  } else {
+  return(bquote(.(Text) ~ .(variables[[type]]) ~ "[" * mu * "mol" ~ m^-2 ~ s^-1 * "]")) 
+  }
+}
+
+
+u_CO2 <- function(Text, type, mode = "mol"){
+  variables <-
+    list(Ca = substitute(expr = italic(C)[a]),
+         Ci = substitute(expr = italic(C)[i]),
+         CO2 = substitute(expr = CO[2]))
+  
+  if(mode == "mol"){
+    return(bquote(.(Text) ~ .(variables[[type]]) ~ "[" * mu * "mol" ~ mol^-1 * "]"))
+  } else {
+    return(bquote(.(Text) ~ .(variables[[type]]) ~ "[Pa]"))
+  }
+}
