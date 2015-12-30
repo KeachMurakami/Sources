@@ -84,7 +84,7 @@ phytochome <-
               legend.text = element_text(size = 5)) +
         geom_area(alpha = .5, position = "identity") +
         coord_cartesian(xlim = waveband, ylim = c(0, peakPFD)) +
-        xlab("wavelength [nm]") + ylab(uSPFD)
+        xlab("wavelength [nm]") + ylab(expression(paste("spectral photon flux density [", mu, "mol ",  m^-2, "", s^-1, "]")))
     } else {
       spectrum <-
         df %>%
@@ -95,7 +95,7 @@ phytochome <-
               legend.text = element_text(size = 5)) +
         geom_line() +
         coord_cartesian(xlim = waveband, ylim = c(0, peakPFD)) +
-        xlab("wavelength [nm]") + ylab(uSPFD)
+        xlab("wavelength [nm]") + ylab(expression(paste("spectral photon flux density [", mu, "mol ",  m^-2, "", s^-1, "]")))
     }
     
     

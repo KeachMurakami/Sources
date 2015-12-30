@@ -16,7 +16,7 @@ u_flux <- function(Text, type){
   if(type == 5){
     return(bquote(.(Text) ~ .(variables[[type]]) ~ "[mol" ~ m^-2 ~ s^-1 * "]")) 
   } else {
-  return(bquote(.(Text) ~ .(variables[[type]]) ~ "[" * mu * "mol" ~ m^-2 ~ s^-1 * "]")) 
+    return(bquote(.(Text) ~ .(variables[[type]]) ~ "[" * mu * "mol" ~ m^-2 ~ s^-1 * "]")) 
   }
 }
 
