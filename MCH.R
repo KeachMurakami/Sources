@@ -29,8 +29,7 @@ readMCH <- function(ID, StartDay, EndDay,
   Calb <- 
     dir(LogPath, pattern = "Calb", full.names = T) %>%
     fread %>%
-    select(everything(), LoggerIDs = 1) %>%
-    filter(LoggerIDs == ID) %>%
+    filter(MCH_ID == as.numeric(ID)) %>%
     select(starts_with("Slope"), starts_with("Intercept")) %>%
     unlist
   
