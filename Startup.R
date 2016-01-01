@@ -53,10 +53,11 @@ if(OFFline){
     MyFunctions[!str_detect(MyFunctions, pattern = "Startup")] %>%    
       a_ply(., .fun = "source", .margins = 1)
     cat("#####warning######\nThe functions are read from local files\nIt might not be the latest ver.")
-} else {
-  library(RCurl)
-  eval(parse(text = getURL("https://raw.githubusercontent.com/KeachMurakami/Sources/master/functions.R", ssl.verifypeer = FALSE)))
-  eval(parse(text = getURL("https://raw.githubusercontent.com/KeachMurakami/Sources/master/labels.R", ssl.verifypeer = FALSE)))
+  } else {
+    library(RCurl)
+    eval(parse(text = getURL("https://raw.githubusercontent.com/KeachMurakami/Sources/master/functions.R", ssl.verifypeer = FALSE)))
+    eval(parse(text = getURL("https://raw.githubusercontent.com/KeachMurakami/Sources/master/labels.R", ssl.verifypeer = FALSE)))
+  }
 }
 
 setwd(temp.dir)
