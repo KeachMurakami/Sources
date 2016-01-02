@@ -60,4 +60,11 @@ if(OFFline){
   }
 }
 
+if(OSMac){
+  # set font family for Mac
+  quartzFonts(Hiragino = c("HiraMaruProN-W4", "HiraKakuStdN-W8", "HiraMinProN-W3", "HiraginoSansGB-W3")) 
+  quartzFonts(YuGo = c("YuGo-Medium", "YuGo-Bold", "YuGo-Bold", "YuGo-Bold")) 
+} else {
+  # set font family for Win
+}
 setwd(temp.dir)
