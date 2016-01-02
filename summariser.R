@@ -25,7 +25,7 @@ summariser <- function(df = ., labels = NULL){
 Label_name <- colnames(df)[labels]
 data_name <- colnames(df)[-labels]
 
-if(length(labels) == 1) {
+if(length(labels) == 1L) {
   
   colnames(df)[labels] <- "MainTrtm" 
   
@@ -86,7 +86,7 @@ if(length(labels) == 1) {
     df %>%
     tidyr::unite(data = .,
                  col = "Trtms",
-                 eval(parse(text = paste0("c(", str_join(Group, collapse = ","), ")"))),
+                 eval(parse(text = paste0("c(", str_c(Group, collapse = ","), ")"))),
                  sep = ":", remove = F) %>%
     select(-matches(paste0("Trtm", "[0-9]$"))) %>%
     group_by_(.dots = as.list(c("MainTrtm", "Trtms")))
@@ -123,7 +123,7 @@ if(length(labels) == 1) {
           df %>%
           tidyr::unite(data = .,
                        col = "Trtms",
-                       eval(parse(text = paste0("c(", str_join(Group, collapse = ","), ")"))),
+                       eval(parse(text = paste0("c(", str_c(Group, collapse = ","), ")"))),
                        sep = ":", remove = F) %>%
           filter(Trtms == unique(Stat$Trtms)[j])
         if(n_distinct(temp$MainTrtm) == 1){
