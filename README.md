@@ -14,6 +14,10 @@ expressionを使って下付き上付き、ギリシャ文字など。
 照射光の分光分布からフィトクロム平衡値を計算します。  
 Calculate phytochrome photostationally state according to the spectral distribution of the light and [Sager et al. (1988) (pdf download link)]("https://elibrary.asabe.org/azdez.asp?JID=3&AID=30952&ConfID=t1988&v=31&i=6&T=2").  
 
+#### standard_funs.R
+sum, sd, meanのna.rm = TRUEバージョンやreshape2::meltをカラム番号で実施する関数など。  
+使う場面が多い。
+
 #### summariser.R
 data.frameから統計量 (samplesize, mean, SD, SE) とTukey-testの結果を計算します。  
 検定は第一カラムをグループとして実施。  
