@@ -68,7 +68,7 @@ if(OFFline){
     str_split(pattern = "\n") %>%
     .[[1]] %>%
     {.[!str_detect(., pattern = "Startup")]}
-
+  
   for(i in 1:length(MyFunctions)){
     funct <-
       MyFunctions[i] %>%
