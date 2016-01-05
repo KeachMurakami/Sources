@@ -1,13 +1,13 @@
 temp.dir <- getwd()
 
 library(MASS)
-library(ggplot2) #ggplot2
+library(ggplot2)
 library(RColorBrewer) 
 library(grid)
 library(plyr)
 library(dplyr)
-require(plyr)
-require(dplyr)
+library(plyr)
+library(dplyr)
 library(reshape2)
 library(xlsx)
 library(knitr)
@@ -23,6 +23,10 @@ library(scales)
 library(pforeach)
 library(devtools)
 library(tidyr)
+library(slackr)
+library(RCurl)
+
+readURL <- function(URL) eval(parse(text = getURL(URL, ssl.verifypeer = FALSE)))
 
 OFFline <- class(try(source_url(url = "https://raw.githubusercontent.com/KeachMurakami/Sources/master/NetworkTest.txt"), silent = T)) == "try-error"
 OSMac <- .Platform$OS.type == "unix"
@@ -32,7 +36,6 @@ if(OSMac){
   # in order to avoid warning message
   # http://stackoverflow.com/questions/9689104/installing-r-on-mac-warning-messages-setting-lc-ctype-failed-using-c
   home.dir <- function() setwd("/Users/keach/Dropbox/R")
-  library(slackr)
   slackr_setup(config_file = ".slackr")
 } else {
   # startups for Win
@@ -48,16 +51,32 @@ options(warn=1)
 
 if(OFFline){
   if(OSMac){
+    # offline and Mac
     MyFunctions <- 
       dir("~/GitHub/BeeLabR/Sources/", pattern = "R$", full.names = T)
     MyFunctions[!str_detect(MyFunctions, pattern = "Startup")] %>%    
       a_ply(., .fun = "source", .margins = 1)
     cat("#####warning######\nThe functions are read from local files\nIt might not be the latest ver.")
   } else {
-    library(RCurl)
-    eval(parse(text = getURL("https://raw.githubusercontent.com/KeachMurakami/Sources/master/functions.R", ssl.verifypeer = FALSE)))
-    eval(parse(text = getURL("https://raw.githubusercontent.com/KeachMurakami/Sources/master/labels.R", ssl.verifypeer = FALSE)))
+    # offline and Win
+    cat("#####warning######\nThe functions are read from local files\nIt might not be the latest ver.")
   }
+} else {
+  # online
+  MyFunctions <-
+    getURL("https://raw.githubusercontent.com/KeachMurakami/Sources/master/functions.txt") %>%
+    str_split(pattern = "\n") %>%
+    .[[1]] %>%
+    {.[!str_detect(., pattern = "Startup")]}
+
+  for(i in 1:length(MyFunctions)){
+    funct <-
+      MyFunctions[i] %>%
+      paste0("https://raw.githubusercontent.com/KeachMurakami/Sources/master/", .)
+    
+    eval(parse(text = getURL(funct, ssl.verifypeer = FALSE)))
+  }
+  cat("#####loaded######\nThe latest ver. functions are loaded from github")
 }
 
 if(OSMac){
