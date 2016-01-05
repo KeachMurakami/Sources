@@ -1,5 +1,8 @@
 mean2 <- 
-  function(x) mean(x, na.rm = T)
+  function(x) mean(x, na.rm = TRUE)
+
+sum2 <-
+  function(x) sum(x, na.rm = TRUE)
 
 sd2 <- 
   function(x) sd(x, na.rm = TRUE)
