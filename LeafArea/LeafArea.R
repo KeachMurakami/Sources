@@ -22,17 +22,19 @@ binary_area <-
       else print("retry")
     }
     
-    d_pix[1:2] <- 400
+    d_pix <- c(400, 400)
     repeat{
       pict[(center_xy[1] - d_pix[1]):(center_xy[1] + d_pix[1]), (center_xy[2] - d_pix[2]):(center_xy[2] + d_pix[2]),] %>%
         dsp
       if(readline("Good size? (y/n)\n") == "y") break
       else {
-        d_pix <<-
+        d_pix <-
           readline(paste0("set dims <- \n format: x,y \n(displayed: ", d_pix[1], ",", d_pix[2], ")")) %>%
           str_split(pattern = ",") %>%
           .[[1]] %>%
           as.numeric
+        
+        dev.off()
       }
     }
     
@@ -50,7 +52,7 @@ binary_area <-
       colorMode(pic_bin) <- 0
       
       overlay <-
-        paintObjects(x = pic_bin, tgt = pic)
+        paintObjects(x = pic_bin, tgt = pic/1.5, opac = c(1, .1))
       colorMode(overlay) <- 2
       
       overlay %>% dsp
@@ -115,6 +117,6 @@ binary_area <-
       .[, "s.area", drop = F] %>%
       data.frame %>%
       slice(used_segment) %>%
-      mutate(B = Blue, G = Green, FullPixel = shown_pixels, segmentID = as.character(used_segment), filepath = pict_file) %>%
+      mutate(B = BlueGreen[1], G = BlueGreen[2], FullPixel = shown_pixels, segmentID = as.character(used_segment), filepath = pict_file) %>%
       return
   }
