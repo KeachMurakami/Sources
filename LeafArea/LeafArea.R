@@ -27,7 +27,7 @@ binary_area <-
         if(readline("Good x range? (y/n)\n") == "y") break
         else {
           d_pix_x0 <-
-            readline(paste0("x range set \n format: left pix, right pix \n displayed left: ", round(d_pix[1], 1), ", right: ", round(d_pix[3], 1))) %>%
+            readline(paste0("\nx range set \n format: left pix, right pix \n displayed left: ", round(d_pix[1], 1), ", right: ", round(d_pix[3], 1))) %>%
             str_split(pattern = ",") %>%
             .[[1]] %>%
             as.numeric
@@ -39,7 +39,7 @@ binary_area <-
         if(readline("Good y range? (y/n)\n") == "y") break
         else {
           d_pix_y0 <-
-            readline(paste0("y range set \n format: upper pix, lower pix \n displayed left: ", round(d_pix[2], 1), ", right: ", round(d_pix[4], 1))) %>%
+            readline(paste0("\ny range set \n format: upper pix, lower pix \n displayed upper: ", round(d_pix[2], 1), ", lower: ", round(d_pix[4], 1))) %>%
             str_split(pattern = ",") %>%
             .[[1]] %>%
             as.numeric
