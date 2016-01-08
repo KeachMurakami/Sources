@@ -18,6 +18,10 @@ Calculate phytochrome photostationally state according to the spectral distribut
 sum, sd, meanのna.rm = TRUEバージョンやreshape2::meltをカラム番号で実施する関数など。  
 使う場面が多い。
 
+#### standard_funs.R
+起動時読み込みをMacとWinで統一。
+それぞれの環境の`Rprofile.site`にはこれを読みこませるだけでOK。
+
 #### summariser.R
 data.frameから統計量 (samplesize, mean, SD, SE) とTukey-testの結果を計算します。  
 検定は第一カラムをグループとして実施。  
