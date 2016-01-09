@@ -35,8 +35,8 @@ if(OSMac){
   system("defaults write org.R-project.R force.LANG en_US.UTF-8")
   # in order to avoid warning message
   # http://stackoverflow.com/questions/9689104/installing-r-on-mac-warning-messages-setting-lc-ctype-failed-using-c
-  home.dir <- function() setwd("/Users/keach/Dropbox/R")
-  slackr_setup(config_file = ".slackr")
+  home.dir <- function() setwd("~/Dropbox/R")
+  slackr_setup(config_file = "~/Dropbox/R/.slackr")
 } else {
   # startups for Win
   home.dir <- function() setwd("C:/Users/KeachMurakami/Dropbox/R")
