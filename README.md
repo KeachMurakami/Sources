@@ -1,6 +1,9 @@
 # 日頃よく使う関数群
 
 ## How to use
+---------
+#### ggplot_accessory.R
+ggplot2 (ver.2~) で表示周りを自分好みに。
 
 #### Graphtec.R, MCH.R
 データロガー (GLシリーズ, Graphtech) と温湿度CO2濃度計 (MCH-383SD, 佐藤商事)のデータをまとめます。  
