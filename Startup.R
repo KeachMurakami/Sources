@@ -1,5 +1,3 @@
-temp.dir <- getwd()
-
 IsFirst <- TRUE
 ### knit時の読込時間を抑える
 
@@ -92,8 +90,5 @@ if(IsFirst){
     # set font family for Win
     windowsFonts(YuGo = c("YuGo-Medium", "YuGo-Bold", "YuGo-Bold", "YuGo-Bold"))
   }
-
-} # fin IsFirts
-setwd(temp.dir)
-
 IsFirst <- FALSE
+} # fin IsFirts
