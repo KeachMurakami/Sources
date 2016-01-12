@@ -4,8 +4,10 @@ gg_theme <- function (legend = "none", ...) {
     theme(panel.grid.minor = element_blank(),
           panel.grid.major = element_blank(),
           legend.position = legend,
+          legend.key = element_blank(),
+          legend.background = element_blank(),
           panel.border = element_rect(fill = NA,colour="black"),  
-          strip.background = element_rect(fill="white",colour="black"),
+          strip.background = element_blank(),
           plot.background = element_blank(),
           panel.background = element_blank(),
           panel.margin = unit(0, units = "points")
