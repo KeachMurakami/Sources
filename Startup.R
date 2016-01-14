@@ -1,5 +1,5 @@
 IsFirst <- TRUE
-### knit時の読込時間を抑える
+### to reduce knit time
 
 if(IsFirst){
   
@@ -7,8 +7,6 @@ if(IsFirst){
   require(ggplot2)
   require(RColorBrewer) 
   require(grid)
-  require(plyr)
-  require(dplyr)
   require(plyr)
   require(dplyr)
   require(reshape2)
@@ -62,6 +60,10 @@ if(IsFirst){
       cat("#####warning######\nThe functions are read from local files\nIt might not be the latest ver.")
     } else {
       # offline and Win
+      MyFunctions <- 
+        dir("~/../Dropbox/R/Sources/", pattern = "R$", full.names = T)
+      MyFunctions[!str_detect(MyFunctions, pattern = "Startup")] %>%    
+        a_ply(., .fun = "source", .margins = 1)
       cat("#####warning######\nThe functions are read from local files\nIt might not be the latest ver.")
     }
   } else {
@@ -88,7 +90,8 @@ if(IsFirst){
     quartzFonts(YuGo = c("YuGo-Medium", "YuGo-Bold", "YuGo-Bold", "YuGo-Bold"))
   } else {
     # set font family for Win
-    windowsFonts(YuGo = c("YuGo-Medium", "YuGo-Bold", "YuGo-Bold", "YuGo-Bold"))
+    windowsFonts(Meiryo = windowsFont("メイリオ"))
+    windowsFonts(YuGo = windowsFont("游ゴシック"))
   }
 IsFirst <- FALSE
 } # fin IsFirts
