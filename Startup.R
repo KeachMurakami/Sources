@@ -36,11 +36,20 @@ if(IsFirst){
     system("defaults write org.R-project.R force.LANG en_US.UTF-8")
     # in order to avoid warning message
     # http://stackoverflow.com/questions/9689104/installing-r-on-mac-warning-messages-setting-lc-ctype-failed-using-c
+    
     home.dir <- function() setwd("~/Dropbox/R")
     slackr_setup(config_file = "~/Dropbox/R/.slackr")
+
+    # set font family for Mac
+    quartzFonts(Hiragino = c("HiraMaruProN-W4", "HiraKakuStdN-W8", "HiraMinProN-W3", "HiraginoSansGB-W3"))
+    quartzFonts(YuGo = c("YuGo-Medium", "YuGo-Bold", "YuGo-Bold", "YuGo-Bold"))
   } else {
     # startups for Win
     home.dir <- function() setwd("C:/Users/KeachMurakami/Dropbox/R")
+    
+    # set font family for Win
+    windowsFonts(Meiryo = windowsFont("メイリオ"))
+    windowsFonts(YuGo = windowsFont("游ゴシック"))
   }
   home.dir()
   
@@ -83,15 +92,5 @@ if(IsFirst){
     }
     cat("#####loaded######\nThe latest ver. functions are loaded from github")
   }
-  
-  if(OSMac){
-    # set font family for Mac
-    quartzFonts(Hiragino = c("HiraMaruProN-W4", "HiraKakuStdN-W8", "HiraMinProN-W3", "HiraginoSansGB-W3"))
-    quartzFonts(YuGo = c("YuGo-Medium", "YuGo-Bold", "YuGo-Bold", "YuGo-Bold"))
-  } else {
-    # set font family for Win
-    windowsFonts(Meiryo = windowsFont("メイリオ"))
-    windowsFonts(YuGo = windowsFont("游ゴシック"))
-  }
-IsFirst <- FALSE
+  IsFirst <- FALSE
 } # fin IsFirts
