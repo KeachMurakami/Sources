@@ -1,0 +1,111 @@
+Log Daily plant growth 
+========================================================
+
+```{r eval = FALSE}
+# input logging times
+start.time.gc <- Sys.time()
+end.time.gc  <- Sys.time()
+```
+
+```{r eval = FALSE}
+data.file <- choose.files()
+
+### output view setting
+  fread(data.file) %>%
+    head(3) %T>%
+    print %>%
+    colnames
+
+  variableCols <-
+    readline("\nenter variable colnumbers\nnumeric vector (sep = ' '):") %>%
+    str_split(pattern = " ") %>%
+    .[[1]] %>%
+    as.numeric
+
+  valueCols <-
+    readline("\nenter value colnumber:") %>%
+    as.numeric
+    
+  removeData <-
+    readline("\nenter the colnumber indicating invalid rows:") %>%
+    as.numeric
+    
+  fread(data.file) %>%
+    select(c(variableCols, valueCols)) %>%
+    summariser(1:length(variableCols)) %>%
+    head
+  
+    if(readline("\nOK? (y/n): ") == "y") {
+      setwd(dirname(data.file))
+      rmarkdown::render(input = "~/../Dropbox/R/Sources/FlexibleLogging.Rmd",
+                        output_file = paste0(data.file, ".md"))
+      markdown::markdownToHTML(file = paste0(data.file, ".md"),
+                               output = paste0(data.file, ".html"))
+    } 
+```
+
+
+```{r eval = TRUE}
+opts_chunk$set(eval = TRUE,
+               error = FALSE,
+               prompt = TRUE,
+               message = FALSE,
+               fig.hight = 10,
+               fig.width = 12,
+               warning =FALSE)
+  
+  library(DT)
+```
+
+
+Times
+-----------
+knit: `r Sys.time()`
+
+started measurement: `r start.time.gc`
+
+finished measurement: `r end.time.gc`
+
+
+```{r results='asis'}
+dataRaw <- read.csv(data.file)
+
+dataRaw %>% datatable
+
+dataName <- colnames(dataRaw)
+
+if(length(variableCols) == 1) dataRaw$variable = "SingleVariable"
+# Visualize raw data
+dataRaw %>%
+  mutate_(Outlier = dataName[removeData],
+          Trtm = dataName[variableCols[1]],
+          value = dataName[valueCols]) %>%
+  mutate(Outlier = is.na(Outlier)) %>%
+  ggplot(aes(x = Trtm, y = value, col = Outlier)) +
+  geom_point(position = "identity") +
+  facet_wrap(~ variable, scale = "free")
+  
+dataClean <-
+  dataRaw %>%
+  filter(Valids) %>%
+  select(variableCols, valueCols)
+
+dataStat <-
+  dataClean %>%
+  summariser(1:length(variableCols)) %>%
+  .[, -3]
+
+dataStat %>% datatable
+
+DataStat %>%
+  ggplot(., aes(x = Trtm, y = ave)) +
+  geom_bar(stat = "identity") +
+  geom_errorbar(aes(ymin = ave - SD, ymax = ave + SD)) +
+  geom_text(aes(y = ave / 2, label = Tukey), col = "White") + 
+  facet_wrap(~variable, scale = "free")
+```
+
+```{r info}
+file.info(data.file)
+sessionInfo()
+```
