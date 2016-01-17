@@ -1,8 +1,16 @@
-library(RCurl)
-txt <- getURL("https://raw.githubusercontent.com/KeachMurakami/Sources/master/data/phytochrome.csv", ssl.verifypeer = FALSE)
-write(txt, smp <- tempfile()) # write the Sager's data to temporary file
-phy.equ <- read.csv(smp)
-rm(smp, txt)
+if(OFFline){
+  tmp_dir <- getwd(); home.dir()
+  phy.equ <-
+    read.csv("~/Dropbox/R/Sources/data/phytochrome.csv")
+  setwd(tmp_dir)
+} else {
+  txt <-
+    getURL("https://raw.githubusercontent.com/KeachMurakami/Sources/master/data/phytochrome.csv", ssl.verifypeer = FALSE)
+  write(txt, smp <- tempfile()) # write the Sager's data to temporary file
+  phy.equ <- read.csv(smp)
+}
+
+rm(smp, txt, tmp_dir)
 
 phytochome <- 
   function(df, fill = TRUE, alpha = 0.5, waveband = c(350, 850), peakPFD = 10){
@@ -46,33 +54,6 @@ phytochome <-
         return(equ)
       }) %>%
       unlist()
-    
-    #   PPFD <-
-    #     lapply(1:data.num, function(X){
-    #       dat %>%
-    #         filter(wavelength <= 700) %>%
-    #         filter(wavelength >= 400) %>%
-    #         .[, X + 3] %>%
-    #         sum() / 1000
-    #     }) %>%
-    #     unlist() %>%
-    #     round(digits = 1)
-    #   
-    #   PFD <-
-    #     lapply(1:data.num, function(X){
-    #       dat %>%
-    #         filter(wavelength <= 800) %>%
-    #         .[, X + 3] %>%
-    #         sum() / 1000
-    #     }) %>%
-    #     unlist() %>%
-    #     round(digits = 1)
-    #   
-    #   colnames(input) <- c("wavelength", paste(as.character(PFD[1:data.num]),
-    #                                            as.character(PPFD[1:data.num]),
-    #                                            as.character(phytochrome.equ[1:data.num]),
-    #                                            sep = "\n")
-    #   )
     
     if(fill == TRUE){
       spectrum <- 
