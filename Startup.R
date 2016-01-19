@@ -90,7 +90,6 @@ if(IsFirst){
     
     cat("#####loaded######\nThe latest ver. functions are loaded from github")
     }
-  }
   IsFirst <- FALSE
   rm(MyFunctions)
-} # fin IsFirts
+  } # fin IsFirts
