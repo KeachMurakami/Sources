@@ -52,10 +52,11 @@ LIGHT <-
   }
 
 SPD <-
-  function(df, from = 350, to = 800){
+  function(df, from = 350, to = 800, ...){
     colnames(df)[1] <- "wavelength"
     df %>%
       melt2(1) %>%
-      ggplot(aes(x = wavelength, y = value, col = variable)) +
-      geom_line()
+      ggplot(aes(x = wavelength, y = value, group = variable, col = variable, ...)) +
+      geom_line() +
+      xlab("wavelength [nm]") + xlim(c(from, to))
   }

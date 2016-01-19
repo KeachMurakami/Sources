@@ -65,14 +65,16 @@ if(IsFirst){
       MyFunctions <- 
         dir("~/GitHub/BeeLabR/Sources/", pattern = "R$", full.names = T)
       MyFunctions[!str_detect(MyFunctions, pattern = "Startup")] %>%    
-        a_ply(., .fun = "source", .margins = 1)
+        a_ply(., .fun = source, .margins = 1)
+      
       cat("#####warning######\nThe functions are read from local files\nIt might not be the latest ver.")
     } else {
       # offline and Win
       MyFunctions <- 
         dir("~/../Dropbox/R/Sources/", pattern = "R$", full.names = T)
       MyFunctions[!str_detect(MyFunctions, pattern = "Startup")] %>%    
-        a_ply(., .fun = "source", .margins = 1)
+        a_ply(., .fun = source, .margins = 1)
+      
       cat("#####warning######\nThe functions are read from local files\nIt might not be the latest ver.")
     }
   } else {
@@ -81,16 +83,14 @@ if(IsFirst){
       getURL("https://raw.githubusercontent.com/KeachMurakami/Sources/master/functions.txt") %>%
       str_split(pattern = "\n") %>%
       .[[1]] %>%
-      {.[!str_detect(., pattern = "Startup")]}
+      {.[!str_detect(., pattern = "Startup")]} %>%
+      paste0("https://raw.githubusercontent.com/KeachMurakami/Sources/master/", .)
+    MyFunctions[!str_detect(MyFunctions, pattern = "Startup")] %>%    
+      a_ply(., .fun = readURL, .margins = 1)
     
-    for(i in 1:length(MyFunctions)){
-      funct <-
-        MyFunctions[i] %>%
-        paste0("https://raw.githubusercontent.com/KeachMurakami/Sources/master/", .)
-      
-      eval(parse(text = getURL(funct, ssl.verifypeer = FALSE)))
-    }
     cat("#####loaded######\nThe latest ver. functions are loaded from github")
+    }
   }
   IsFirst <- FALSE
+  rm(MyFunctions)
 } # fin IsFirts
