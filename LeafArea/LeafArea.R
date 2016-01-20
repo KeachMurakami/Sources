@@ -4,7 +4,7 @@ binary_area <-
   function(pict_file = NULL, FilteringColor = "G", SizeRatio_Min_vs_Max = 20){
     
     dsp <- function(x, ...) display(x, method = "raster", ...)
-
+    
     SetSize <- function(){
       dsp(pict0)
       repeat{
@@ -15,7 +15,7 @@ binary_area <-
           unlist %T>%
           print
         abline(v = left_top[1], col = "red"); abline(h = left_top[2], col = "red")
-
+        
         cat("\n\n\nset right bottom: click in the picture window, then push Esc")
         right_bottom <-
           locator() %>%
@@ -27,7 +27,7 @@ binary_area <-
         else cat("\n\nretry")
       }
       pict <<- pict0[left_top[1]:right_bottom[1], left_top[2]:right_bottom[2],]
-    
+      
       if(!FlagBinary) coloring()
       else if(readline("set color or skip? (y = set it)") == "y") coloring()
       else Calculates()
