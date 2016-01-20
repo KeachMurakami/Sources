@@ -76,17 +76,20 @@ dataName <- colnames(dataRaw)
 
 if(length(variableCols) == 1) dataRaw$variable = "SingleVariable"
 # Visualize raw data
-dataRaw %>%
-  mutate_(Outlier = dataName[removeData],
-          Trtm = dataName[variableCols[1]],
-          value = dataName[valueCols]) %>%
-  mutate(Outlier = is.na(Outlier)) %>%
+data01 <-
+  dataRaw %>%
+    mutate_(Outlier = dataName[removeData],
+            Trtm = dataName[variableCols[1]],
+            value = dataName[valueCols]) %>%
+    mutate(Outlier = is.na(Outlier))
+
+data01 %>%
   ggplot(aes(x = Trtm, y = value, col = Outlier)) +
   geom_point(position = "identity") +
   facet_wrap(~ variable, scale = "free")
   
 dataClean <-
-  dataRaw %>%
+  data01 %>%
   filter(Valids) %>%
   select(variableCols, valueCols)
 
@@ -97,7 +100,7 @@ dataStat <-
 
 dataStat %>% datatable
 
-DataStat %>%
+dataStat %>%
   ggplot(., aes(x = Trtm, y = ave)) +
   geom_bar(stat = "identity") +
   geom_errorbar(aes(ymin = ave - SD, ymax = ave + SD)) +
