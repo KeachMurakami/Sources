@@ -1,53 +1,33 @@
 library(EBImage)
 
 binary_area <-
-  function(pict_file = NULL, FilteringColor = "G"){
+  function(pict_file = NULL, FilteringColor = "G", SizeRatio_Min_vs_Max = 20){
     
     dsp <- function(x, ...) display(x, method = "raster", ...)
-    dsp_sized <- function() dsp(pict[(center_xy[1] - d_pix[1]):(center_xy[1] + d_pix[3]), (center_xy[2] - d_pix[2]):(center_xy[2] + d_pix[4]),])
-    
+
     SetSize <- function(){
       dsp(pict0)
-      cat("\n\n\nclick the center of view in the picture window, then push Esc")
       repeat{
-        center_xy <<-
+        dsp(pict0)
+        cat("\n\n\nset left top: click in the picture window, then push Esc")
+        left_top <-
           locator() %>%
           unlist %T>%
           print
-        points(center_xy[1], center_xy[2], col = 5, pch = 19)  
-        if(readline("Captured the centers well? (y/n)\n") == "y") break
+        abline(v = left_top[1], col = "red"); abline(h = left_top[2], col = "red")
+
+        cat("\n\n\nset right bottom: click in the picture window, then push Esc")
+        right_bottom <-
+          locator() %>%
+          unlist %T>%
+          print
+        abline(v = right_bottom[1], col = "red"); abline(h = right_bottom[2], col = "red")
+        
+        if(readline("OK? (y/n)") == "y") break
         else cat("\n\nretry")
       }
-      
-      d_pix_max <- c(center_xy, dim(pict0)[1:2] - center_xy)
-      d_pix <- d_pix_max * .8
-      
-      repeat{
-        dsp_sized()
-        if(readline("Good x range? (y/n)\n") == "y") break
-        else {
-          d_pix_x0 <-
-            readline(paste0("\nx range set \n format: left pix, right pix \n displayed left: ", round(d_pix[1], 1), ", right: ", round(d_pix[3], 1))) %>%
-            str_split(pattern = ",") %>%
-            .[[1]] %>%
-            as.numeric
-          d_pix[c(1, 3)] <<- c(min(d_pix_max[1], d_pix_x0[1]), min(d_pix_max[3], d_pix_x0[2]))
-        }
-      }
-      repeat{
-        dsp_sized()
-        if(readline("Good y range? (y/n)\n") == "y") break
-        else {
-          d_pix_y0 <-
-            readline(paste0("\ny range set \n format: upper pix, lower pix \n displayed upper: ", round(d_pix[2], 1), ", lower: ", round(d_pix[4], 1))) %>%
-            str_split(pattern = ",") %>%
-            .[[1]] %>%
-            as.numeric
-          d_pix[c(2, 4)] <<- c(min(d_pix_max[2], d_pix_y0[1]), min(d_pix_max[4], d_pix_y0[2]))
-        }
-      }
-      pict <<- pict0[(center_xy[1] - d_pix[1]):(center_xy[1] + d_pix[3]), (center_xy[2] - d_pix[2]):(center_xy[2] + d_pix[4]),]
-      
+      pict <<- pict0[left_top[1]:right_bottom[1], left_top[2]:right_bottom[2],]
+    
       if(!FlagBinary) coloring()
       else if(readline("set color or skip? (y = set it)") == "y") coloring()
       else Calculates()
@@ -97,7 +77,7 @@ binary_area <-
         bwlabel %>%
         computeFeatures.shape %>%
         .[, "s.area", drop = F] %>%
-        {. > max(.)/10}
+        {. > max(.) / SizeRatio_Min_vs_Max}
       
       segment_xy <<-
         pict_bin %>%
@@ -137,8 +117,8 @@ binary_area <-
         data.frame %>%
         slice(used_segment) %>%
         mutate(segmentID = as.character(used_segment), ColLow = ColRange[1], ColHigh = ColRange[2],
-               X_min = center_xy[1] - d_pix[1], X_max = center_xy[1] + d_pix[1], 
-               Y_min = center_xy[2] - d_pix[2], Y_max = center_xy[2] + d_pix[2], 
+               X_min = left_top[1], X_max = right_bottom[1], 
+               Y_min = left_top[2], Y_max = right_bottom[2], 
                current_dir = getwd(), filepath = pict_file)
       
       print(results)
@@ -165,5 +145,4 @@ binary_area <-
     FlagBinary <- FALSE
     
     SetSize()
-    
   }
