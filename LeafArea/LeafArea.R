@@ -123,14 +123,26 @@ binary_area <-
       
       print(results)
       
-      CheckData <- readline("Problems in data? (no/size/color)")
+      CheckData <- readline("Problems in data? (no/size/color/label)")
       if(CheckData == "no") return(results)
       else if(CheckData == "size") {
         pict <<- pict0
         SetSize()
       }
-      else coloring()
+      else if(CheckData == "color") {
+        FilterCol <<- 
+          readline("\n\nSet color (R/G/B):") %>%
+          switch(., "R" = 1, "G" = 2, "B" = 3)
+        coloring()
+      }
+      else {
+        SizeRatio_Min_vs_Max <<-
+          readline("\n\nLargest / Smallest segments: ") %>%
+          as.numeric
+        Calculates()
+      }
     }
+      
     if(is.null(pict_file)){  
       pict_file <-
         file.choose()
