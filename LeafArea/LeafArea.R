@@ -99,7 +99,7 @@ binary_area <-
         text(x = segment_labels[i, 1],
              y = segment_labels[i, 2],
              label = segment_labels[i, 3],
-             adj = c(0,1), col = "black", cex = 2)
+             adj = c(0,1), col = "red", cex = 2)
       }
       
       
