@@ -27,8 +27,6 @@ if(IsFirst){
   require(slackr)
   require(RCurl)
   
-  readURL <- function(URL) eval(parse(text = getURL(URL, ssl.verifypeer = FALSE)))
-  
   OFFline <- class(try(source_url(url = "https://raw.githubusercontent.com/KeachMurakami/Sources/master/NetworkTest.txt"), silent = T)) == "try-error"
   OSMac <- .Platform$OS.type == "unix"
   if(OSMac){
@@ -86,7 +84,7 @@ if(IsFirst){
       {.[!str_detect(., pattern = "Startup")]} %>%
       paste0("https://raw.githubusercontent.com/KeachMurakami/Sources/master/", .)
     MyFunctions[!str_detect(MyFunctions, pattern = "Startup")] %>%    
-      a_ply(., .fun = readURL, .margins = 1)
+      a_ply(., .fun = source_url, .margins = 1)
     
     cat("#####loaded######\nThe latest ver. functions are loaded from github")
     }
