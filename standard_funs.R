@@ -18,10 +18,12 @@ melt2 <-
     # syntax sugar for melt
     # input numerics to id.vars
     
+    #input df was converted into data.table for speed
+    
     if(length(cols) >= dim(df)[2]) stop(message = "undefined columns selected")
 
     cols %>%
     as.numeric %>%
     colnames(df)[.] %>%
-    reshape2::melt(df, id.vars = ., ...)
+    data.table::melt(as.data.table(df), id.vars = ., ...)
   }
