@@ -106,7 +106,7 @@ readMCH <- function(ID, StartDay, EndDay,
         
         temp %>%
           select(Date, Time, ends_with("Value")) %>%
-          setnames(c("Day", "Time", "Hum", "Temp", "CO2")) %>%
+          setnames(c("Day", "Time", "RH", "Temp", "CO2")) %>%
           return
       }
     }) %>%
@@ -118,7 +118,7 @@ readMCH <- function(ID, StartDay, EndDay,
            LightOn = ONtime, LightOff = OFFtime,
            Time = ymd_hms(Time, tz="Asia/Tokyo"),
            DayNight = Vectorize(DNdet)(Hour, LightOn, LightOff), # day night
-           Hum = (Hum - Calb[4]) / Calb[1], # calbrate
+           RH = (RH - Calb[4]) / Calb[1], # calbrate
            Temp = (Temp - Calb[5]) / Calb[2], # calbrate
            CO2 = (CO2 - Calb[6]) / Calb[3] # calbrate
     ) %>%
@@ -132,7 +132,7 @@ readMCH <- function(ID, StartDay, EndDay,
   Hourly <<-
     mutate(., DayHour = paste0(Day, " ", Hour)) %>%
     group_by(ID, DayNight, Day, Hour, DayHour) %>%
-    summarise(MeanHum = mean(Hum), SDHum = sd(Hum),
+    summarise(MeanRH = mean(RH), SDRH = sd(RH),
               MeanTemp = mean(Temp), SDTemp = sd(Temp),
               MeanCO2 = mean(CO2), SDCO2 = sd(CO2)) %>%
     ungroup %>%
@@ -141,7 +141,7 @@ readMCH <- function(ID, StartDay, EndDay,
   # daily
   Daily <<-
     group_by(., ID, DayNight, Day) %>%
-    summarise(MeanHum = mean(Hum), SDHum = sd(Hum),
+    summarise(MeanRH = mean(RH), SDRH = sd(RH),
               MeanTemp = mean(Temp), SDTemp = sd(Temp),
               MeanCO2 = mean(CO2), SDCO2 = sd(CO2)) %>%
     ungroup %>%
@@ -149,7 +149,7 @@ readMCH <- function(ID, StartDay, EndDay,
   # all span
   FullSpan <<-
     group_by(., ID, DayNight) %>%
-    summarise(MeanHum = mean(Hum), SDHum = sd(Hum),
+    summarise(MeanRH = mean(RH), SDRH = sd(RH),
               MeanTemp = mean(Temp), SDTemp = sd(Temp),
               MeanCO2 = mean(CO2), SDCO2 = sd(CO2)) %>%
     ungroup
@@ -158,7 +158,7 @@ readMCH <- function(ID, StartDay, EndDay,
 options(warn = warn.value) # reset warning
 
 Raw %>%
-  select(ID, DayNight, Hum, CO2, Temp, Time) %>%
+  select(ID, DayNight, RH, CO2, Temp, Time) %>%
   list(Raw = ., Hourly = Hourly, Daily = Daily, Span = FullSpan,
        inputs = list(ID = ID, StartDay = StartDay, EndDay = EndDay,
                      StartTime = StartTime, EndTime = EndTime, ONtime, OFFtime, LogPath)) %>%
