@@ -27,3 +27,6 @@ melt2 <-
     colnames(df)[.] %>%
     data.table::melt(as.data.table(df), id.vars = ., ...)
   }
+
+rbind_all2 <-
+  function(df) rbind_all(df) %>% as.data.table
