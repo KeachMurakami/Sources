@@ -8,6 +8,8 @@ if(OFFline){
     getURL("https://raw.githubusercontent.com/KeachMurakami/Sources/master/data/phytochrome.csv", ssl.verifypeer = FALSE)
   write(txt, smp <- tempfile()) # write the Sager's data to temporary file
   phy.equ <- read.csv(smp)
+  
+  rm(smp, txt)
 }
 
 
