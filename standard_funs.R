@@ -29,4 +29,12 @@ melt2 <-
   }
 
 rbind_all2 <-
-  function(df) rbind_all(df) %>% as.data.table
+  function(df) {
+    temp <- options()$warn
+    options(warn = -1)
+    res <-
+      rbind_all(df) %>%
+      as.data.table
+    options(warn = temp)
+    return(res)
+    }
