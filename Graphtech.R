@@ -36,7 +36,7 @@ readGL <- function(ID, ch, StartDay, EndDay,
   Calb <- 
     dir(LogPath, pattern = "Calb", full.names = T) %>%
     fread %>%
-    select(everything(), LoggerIDs = 1) %>%
+    select(everything(), LoggerIDs = GL_ID) %>%
     filter(LoggerIDs == ID, GL_ch == ch) %>%
     select(starts_with("Slope"), starts_with("Intercept")) %>%
     unlist
