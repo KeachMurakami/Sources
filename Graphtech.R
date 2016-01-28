@@ -34,7 +34,7 @@ readGL <- function(ID, ch, StartDay, EndDay,
   
   # read calibration data
   Calb <- 
-    dir(LogPath, pattern = "Calb", full.names = T) %>%
+    dir(LogPath, pattern = "Calb|calb", full.names = T) %>%
     fread %>%
     select(everything(), LoggerIDs = GL_ID) %>%
     filter(LoggerIDs == ID, GL_ch == ch) %>%
@@ -96,8 +96,8 @@ readGL <- function(ID, ch, StartDay, EndDay,
   }
   
   selected_ch <- paste0("ch", ch)
-  CutFrom <- ymd_hms(paste0(StartDay, " ", StartTime), tz = "Asia/Tokyo")
-  CutTill <- ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo")
+  CutFrom <- ymd_hms(paste0(StartDay, " ", StartTime), tz = Sys.timezone())
+  CutTill <- ymd_hms(paste0(EndDay, " ", EndTime), tz = Sys.timezone())
   
   Raw <-
     lapply(1:length(DataDirs), function(i){
@@ -121,7 +121,7 @@ readGL <- function(ID, ch, StartDay, EndDay,
     separate(col = Time, into = c("Day", "time"), sep = " ", remove = F) %>%  
     separate(col = time, into = c("Hour", "Min", "Sec"), sep = ":") %>%
     mutate(LightOn = ONtime, LightOff = OFFtime,
-           Time = ymd_hms(Time, tz="Asia/Tokyo"),
+           Time = ymd_hms(Time, tz = Sys.timezone()),
            DayNight = Vectorize(DNdet)(Hour, LightOn, LightOff), # day night
            Temp= (val - Calb[2]) / Calb[1] # calbrate
     ) %>%

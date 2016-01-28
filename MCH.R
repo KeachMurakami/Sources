@@ -27,7 +27,7 @@ readMCH <- function(ID, StartDay, EndDay,
   
   # read calibration data
   Calb <- 
-    dir(LogPath, pattern = "Calb", full.names = T) %>%
+    dir(LogPath, pattern = "Calb|calb", full.names = T) %>%
     fread %>%
     filter(MCH_ID == as.numeric(ID)) %>%
     select(starts_with("Slope"), starts_with("Intercept")) %>%
@@ -91,8 +91,8 @@ readMCH <- function(ID, StartDay, EndDay,
     break
   }
   
-  CutFrom <- ymd_hms(paste0(StartDay, " ", StartTime), tz = "Asia/Tokyo")
-  CutTill <- ymd_hms(paste0(EndDay, " ", EndTime), tz = "Asia/Tokyo")
+  CutFrom <- ymd_hms(paste0(StartDay, " ", StartTime), tz = Sys.timezone())
+  CutTill <- ymd_hms(paste0(EndDay, " ", EndTime), tz = Sys.timezone())
   
   Raw <-
     lapply(1:length(DataDirs), function(i){
@@ -116,7 +116,7 @@ readMCH <- function(ID, StartDay, EndDay,
     separate(col = Time, into = c("Hour", "Min", "Sec"), sep = ":", remove = F) %>%
     mutate(Time = paste0(Day, " ", Time),
            LightOn = ONtime, LightOff = OFFtime,
-           Time = ymd_hms(Time, tz="Asia/Tokyo"),
+           Time = ymd_hms(Time, tz = Sys.timezone()),
            DayNight = Vectorize(DNdet)(Hour, LightOn, LightOff), # day night
            RH = (RH - Calb[4]) / Calb[1], # calbrate
            Temp = (Temp - Calb[5]) / Calb[2], # calbrate
