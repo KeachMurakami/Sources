@@ -22,6 +22,9 @@ summariser <- function(df = ., labels = NULL){
 #     "
 #   } 
 
+DefaultWarnSetting <- options()$warn
+options(warn = -1)
+  
 Label_name <- colnames(df)[labels]
 data_name <- colnames(df)[-labels]
 
@@ -146,6 +149,8 @@ if(length(labels) == 1L) {
     rbind_all %>%
     select(MainTrtm = trt, Trtms, variable, Tukey = M) %>%
     mutate(MainTrtm = str_trim(as.character(MainTrtm)))
+  
+  options(warn = DefaultWarnSetting)
   
   Returns <-
     join(Stat, Signif, by = c("MainTrtm", "Trtms", "variable")) %>%
