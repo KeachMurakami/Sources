@@ -37,4 +37,10 @@ rbind_all2 <-
       as.data.table
     options(warn = temp)
     return(res)
-    }
+  }
+
+
+`%!in%` <-
+  function (x, table){
+    !match(x, table, nomatch = 0L) > 0L
+  }
