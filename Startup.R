@@ -27,8 +27,8 @@ if(IsFirst){
   require(slackr)
   require(RCurl)
   
-  # install required version {rmarkdown} for MRO 
-  install.packages("rmarkdown", repos = "https://cran.revolutionanalytics.com") 
+  # install required version {rmarkdown} for MRO, only the first time.
+  # install.packages("rmarkdown", repos = "https://cran.revolutionanalytics.com") 
   
   OFFline <- class(try(source_url(url = "https://raw.githubusercontent.com/KeachMurakami/Sources/master/NetworkTest.txt"), silent = T)) == "try-error"
   OSMac <- .Platform$OS.type == "unix"
