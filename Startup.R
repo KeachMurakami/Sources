@@ -26,6 +26,7 @@ if(IsFirst){
   require(tidyr)
   require(slackr)
   require(RCurl)
+  require(broom)
   
   # install required version {rmarkdown} for MRO, only the first time.
   # install.packages("rmarkdown", repos = "https://cran.revolutionanalytics.com") 
