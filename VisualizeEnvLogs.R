@@ -14,7 +14,8 @@ EnvLog <-
       geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = rel(0.5)) +
       geom_line() +
       geom_point(alpha = .5) +
-      facet_grid(variable ~ ., scale = "free")
+      facet_grid(variable ~ ., scale = "free") +
+      guides(col = guide_legend(title = NULL))
   }
 
 EnvHist <-
@@ -30,5 +31,6 @@ EnvHist <-
       mutate(label = paste0(ID, ch, ", ", DayNight)) %>%
       ggplot(aes(x = Mean, fill = label, group = label)) +
       geom_histogram(position = "identity", alpha = .5) +
-      facet_grid(variable ~ .)
+      facet_grid(variable ~ .) +
+      guides(fill = guide_legend(title = NULL))
   }
