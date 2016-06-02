@@ -31,6 +31,6 @@ EnvHist <-
       mutate(label = paste0(ID, ch, ", ", DayNight)) %>%
       ggplot(aes(x = Mean, fill = label, group = label)) +
       geom_histogram(position = "identity", alpha = .5) +
-      facet_grid(variable ~ .) +
+      facet_grid(. ~ variable, scale = "free") +
       guides(fill = guide_legend(title = NULL))
   }
