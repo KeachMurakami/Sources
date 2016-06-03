@@ -5,7 +5,7 @@ u_g_m2 <- function(Text) bquote(.(Text) ~ "[g" * m^-2 * "]")
 u_mmol_m2 <- function(Text) bquote(.(Text) ~ "[mmol" ~ m^-2, "]")
 u_SPFD <- function(Text) bquote(.(Text) ~ "[" * mu * "mol" ~ m^-2 ~ s^-1 ~ nm^-1 * "]")
 
-u_flux <- function(Text, type){
+u_flux <- function(Text, type = NULL){
   variables <-
     list(PFD = substitute(),
          Pn = substitute(expr = italic(P)[n]),
@@ -21,7 +21,7 @@ u_flux <- function(Text, type){
 }
 
 
-u_CO2 <- function(Text, type, mode = "mol"){
+u_CO2 <- function(Text, type = NULL, mode = "mol"){
   variables <-
     list(Ca = substitute(expr = italic(C)[a]),
          Ci = substitute(expr = italic(C)[i]),
