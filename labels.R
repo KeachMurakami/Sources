@@ -33,3 +33,5 @@ u_CO2 <- function(Text, type = "", mode = "mol"){
     return(bquote(.(Text) ~ .(variables[[type]]) ~ "[Pa]"))
   }
 }
+
+PAMyieldratios <- substitute(expr = italic(Y)[II] * "/" * italic(Y)[I])
