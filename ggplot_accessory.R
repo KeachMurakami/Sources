@@ -1,12 +1,12 @@
 ### for my ggplot2 theme
 
-theme_bw2 <-
-  function(base_size = 12, base_family = "", legend = "none", ...){
-    theme_bw(...) %+replace%
-    theme(legend.position = legend,
-          axis.ticks = element_line(colour = "grey50")
-    )
-  }
+# theme_bw2 <-
+#   function(base_size = 12, base_family = "", legend = "none", ...){
+#     theme_bw(...) %+replace%
+#     theme(legend.position = legend,
+#           axis.ticks = element_line(colour = "grey50")
+#     )
+#   }
 
 gg_theme <-
   function (base_size = 12, base_family = "", legend = "none", ...) {
