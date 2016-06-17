@@ -2,7 +2,7 @@
 
 theme_bw2 <-
   function(base_size = 12, base_family = "", legend = "none"){
-    theme_bw(...) %+replace%
+    theme_bw() %+replace%
     theme(legend.position = legend,
           axis.ticks = element_line(colour = "grey50")
     )
