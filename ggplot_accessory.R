@@ -1,13 +1,5 @@
 ### for my ggplot2 theme
 
-# theme_bw2 <-
-#   function(base_size = 12, base_family = "", legend = "none", ...){
-#     theme_bw(...) %+replace%
-#     theme(legend.position = legend,
-#           axis.ticks = element_line(colour = "grey50")
-#     )
-#   }
-
 gg_theme <-
   function (base_size = 12, base_family = "", legend = "none", ...) {
     theme_bw(...) %+replace%
@@ -23,6 +15,19 @@ gg_theme <-
             panel.margin = unit(0, units = "points")
       )
   }
+
+
+theme_bw2 <-
+  function(base_size = 12, base_family = "", legend = "none"){
+    theme_bw() %+replace%
+      theme(legend.position = legend,
+            legend.title = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.ticks = element_line(colour = "grey50", size = rel(.75)),
+            panel.margin = unit(0, units = "points")
+      )
+  }
+
 
 ### fix axes ranges
 gg_xy <-
