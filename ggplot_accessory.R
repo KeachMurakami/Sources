@@ -19,7 +19,7 @@ gg_theme <-
 
 theme_bw2 <-
   function(base_size = 12, base_family = "", legend = "none"){
-    theme_bw() %+replace%
+    theme_bw(base_size = base_size, base_family = base_family) %+replace%
       theme(legend.position = legend,
             legend.title = element_blank(),
             panel.grid.minor = element_blank(),
