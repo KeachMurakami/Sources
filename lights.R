@@ -67,12 +67,16 @@ SPDnorm <-
   function(df, from = 350, to = 800, integratedPFD = 100){
     if(colnames(df)[1] != "wavelength") stop("1st column must be 'wavelength'")
     
-    df <- as.data.frame(df)
+    df <-
+      as.data.frame(df) %>%
+      filter(wavelength %% 1 == 0)
     
     light_number <-
       dim(df)[2] - 1
     Sums <-
-      colwise(sum)(df) %>%
+      df %>%
+      filter(between(wavelength, from, to)) %>%
+      colwise(sum2)() %>%
       unlist
     
     for(i in 2:(light_number+1)){
