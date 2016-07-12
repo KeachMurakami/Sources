@@ -62,3 +62,23 @@ SPD <-
       geom_line() +
       xlab("wavelength [nm]") + xlim(c(from, to))
   }
+
+SPDnorm <- 
+  function(df, from = 350, to = 800, integratedPFD = 100){
+    if(colnames(df)[1] != "wavelength") stop("1st column must be 'wavelength'")
+    
+    df <- as.data.frame(df)
+    
+    light_number <-
+      dim(df)[2] - 1
+    Sums <-
+      colwise(sum)(df) %>%
+      unlist
+    
+    for(i in 2:(light_number+1)){
+      df[, i] <- df[, i] * integratedPFD / Sums[i]
+    }
+    
+    df %>%
+      return
+  }
