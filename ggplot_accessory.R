@@ -25,6 +25,7 @@ theme_bw2 <-
             axis.ticks = element_line(colour = "grey50", size = rel(.75)),
             panel.border = element_rect(fill = NA,colour="black"),  
             strip.background = element_blank(),
+            strip.text = element_text(hjust = 0),
             panel.grid.minor = element_blank(),
             panel.margin = unit(0, units = "points")
       )
