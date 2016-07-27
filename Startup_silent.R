@@ -25,6 +25,8 @@
   require(RCurl)
   require(broom)
   
+  OFFline <- F
+  
   # install required version {rmarkdown} for MRO, only the first time.
   # install.packages("rmarkdown", repos = "https://cran.revolutionanalytics.com") 
   
