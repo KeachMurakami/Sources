@@ -26,6 +26,7 @@
   require(broom)
   
   OFFline <- F
+  home.dir <- function() setwd("~/Dropbox/R")
   
   # install required version {rmarkdown} for MRO, only the first time.
   # install.packages("rmarkdown", repos = "https://cran.revolutionanalytics.com") 
