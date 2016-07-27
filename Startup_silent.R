@@ -39,8 +39,6 @@
   quartzFonts(Hiragino = c("HiraMaruProN-W4", "HiraKakuStdN-W8", "HiraMinProN-W3", "HiraginoSansGB-W3"))
   quartzFonts(YuGo = c("YuGo-Medium", "YuGo-Bold", "YuGo-Bold", "YuGo-Bold"))
   
-  home.dir()
-  
   
   options(help_type="html")
   options(warn=1)
