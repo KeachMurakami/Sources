@@ -17,5 +17,11 @@ WriteLog <- function(PubName = ""){
     mutate(Date = mdy(Date)) %>%
     filter(Pub %in% PubName) %>%
     ggplot(aes(Date, words, group = Pub, col = Pub)) +
-    geom_line()
+    theme_bw() +
+    theme(legend.position = c(.8, .4),
+          legend.key = element_blank(),
+          legend.title = element_blank(),
+          legend.background = element_blank()) +
+    geom_line() +
+    geom_point()
 }
