@@ -6,12 +6,12 @@ bib_update <-
     } else {
       
       paste0("cat ", input_dir, "*.bib > ", output_dir, "full_with.bib") %>% system
-      paste0("cat ", output_dir, "*with.bib > ", output_dir, "with.bib") %>% system
+      paste0("cat ", output_dir, "*with.bib > ", output_dir, "With.bib") %>% system
       
       paste0("mv ", output_dir, "full_with.bib ", output_dir, "full_without.bib") %>% system
-      paste0("cat ", output_dir, "*without.bib > ", output_dir, "without.bib") %>% system
+      paste0("cat ", output_dir, "*without.bib > ", output_dir, "Without.bib") %>% system
       
-      paste0("mv ", output_dir, "full_without.bib ", output_dir, "full.bib") %>% system
+      paste0("mv ", output_dir, "full_without.bib ", output_dir, "Full.bib") %>% system
       
     }
     cat("\nCitations have been updated.\n\n")
