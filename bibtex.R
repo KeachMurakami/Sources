@@ -1,5 +1,5 @@
 bib_update <-
-  function(input_dir = "~/Dropbox/Paper/bibtex/", output_dir = "~/GitHub/BeeLabR/BibTex/"){
+  function(input_dir = "~/GitHub/BeeLabR/BibTex/list_bib/", output_dir = "~/GitHub/BeeLabR/BibTex/"){
     OS <- .Platform$OS.type
     if(OS != "unix"){
       stop("Win用にパスを設定していないのでMacでやる")
