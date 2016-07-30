@@ -23,5 +23,6 @@ WriteLog <- function(PubName = ""){
           legend.title = element_blank(),
           legend.background = element_blank()) +
     geom_line() +
-    geom_point()
+    geom_point() +
+    ylab("Words in the body")
 }
