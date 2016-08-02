@@ -11,8 +11,9 @@ bib_update <-
       paste0("mv ", output_dir, "full_with.bib ", output_dir, "full_without.bib") %>% system
       paste0("cat ", output_dir, "*without.bib > ", output_dir, "Without.bib") %>% system
       
-      paste0("mv ", output_dir, "full_without.bib ", output_dir, "Full.bib") %>% system
-      
+      paste0("mv ", output_dir, "full_without.bib ", output_dir, "tempFull.bib") %>% system
+      paste0("cat ", output_dir, "*Full.bib > ", output_dir, "Full.bib") %>% system
+      paste0("rm ", output_dir, "tempFull.bib") %>% system
     }
     cat("\nCitations have been updated.\n\n")
   }
@@ -24,6 +25,10 @@ abbrv_update <-
     abbrv_dir <-
       dirname(abbrv_file)
     
+    abbrv_list$Full.1 %>%
+      as.character %>%
+      write(file = paste0(abbrv_dir, "/abbrev_Full.bib"))
+
     abbrv_list$Abbrv_with_period.1 %>%
       as.character %>%
       write(file = paste0(abbrv_dir, "/abbrv_with.bib"))
