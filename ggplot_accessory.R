@@ -31,6 +31,21 @@ theme_bw2 <-
       )
   }
 
+theme_thesis <-
+  function(base_size = 12, base_family = "", legend = "none"){
+    theme_bw(base_size = base_size, base_family = base_family) %+replace%
+      theme(legend.position = legend,
+            legend.title = element_blank(),
+            axis.ticks = element_line(colour = "grey50", size = rel(.75)),
+            panel.border = element_rect(fill = NA,colour="black"),  
+            strip.background = element_blank(),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.margin = unit(0, units = "points"),
+            strip.text = element_blank()
+      )
+  }
+
 
 ### fix axes ranges
 gg_xy <-
