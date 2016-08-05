@@ -14,8 +14,8 @@ EqnSupNum_count <- 0
 FigSupNum_count <- 0
 TableSupNum_count <- 0
 
-
 Labeling <- function(ID, pre = "Fig. ") paste0(pre, EqnHead, ID)
+
 
 EqnNum <- 
   function(head = EqnHead){
