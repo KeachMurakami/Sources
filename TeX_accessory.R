@@ -2,6 +2,6 @@
 
 EqnNum <- 
   function(head = EqnHead){
-    Num_count <<- Num_count + 1
-    return(paste0(head, Num_count))
+    EqnNum_count <<- EqnNum_count + 1
+    return(paste0(head, EqnNum_count))
   }
