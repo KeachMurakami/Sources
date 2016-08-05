@@ -10,3 +10,4 @@ my_jekyll.R
 VisualizeEnvLogs.R
 bibtex.R
 knitr_accessory.R
+TeX_accessory.R

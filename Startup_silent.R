@@ -24,6 +24,7 @@
   require(slackr)
   require(RCurl)
   require(broom)
+  library(latex2exp)
   
   OFFline <- F
   home.dir <- function() setwd("~/Dropbox/R")

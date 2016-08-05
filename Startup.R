@@ -27,6 +27,7 @@ if(IsFirst){
   require(slackr)
   require(RCurl)
   require(broom)
+  library(latex2exp)
   
   # install required version {rmarkdown} for MRO, only the first time.
   # install.packages("rmarkdown", repos = "https://cran.revolutionanalytics.com") 
