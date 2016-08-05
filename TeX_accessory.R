@@ -1,5 +1,22 @@
 ### add Eqn, Fig, Table number automatically
 
+EqnHead <- ""
+FigHead <- "Fig. "
+TableHead <- "Table "
+EqnNum_count <- 0
+FigNum_count <- 0
+TableNum_count <- 0
+
+EqnSupHead <- "S"
+FigSupHead <- "Fig. S"
+TableSupHead <- "Table S"
+EqnSupNum_count <- 0
+FigSupNum_count <- 0
+TableSupNum_count <- 0
+
+
+Labeling <- function(ID, pre = "Fig. ") paste0(pre, EqnHead, ID)
+
 EqnNum <- 
   function(head = EqnHead){
     EqnNum_count <<- EqnNum_count + 1
