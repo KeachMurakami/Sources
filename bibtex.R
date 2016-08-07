@@ -29,9 +29,9 @@ update_abbrv <-
              With = paste0('@string{', Abbrv, '=\"', Abbrv_with_period, '\"}'),
              Without = paste0('@string{', Abbrv, '=\"', Abbrv_without_period, '\"}')) %>%
     {
-      .$Full %>% as.character() %>% write(file = paste0(abbrv_dir, "/abbrev_Fulla.bib"))
-      .$With %>% as.character() %>% write(file = paste0(abbrv_dir, "/abbrev_witha.bib"))
-      .$Without %>% as.character() %>% write(file = paste0(abbrv_dir, "/abbrev_withouta.bib"))
+      .$Full %>% as.character() %>% write(file = paste0(abbrv_dir, "/abbrev_Full.bib"))
+      .$With %>% as.character() %>% write(file = paste0(abbrv_dir, "/abbrev_with.bib"))
+      .$Without %>% as.character() %>% write(file = paste0(abbrv_dir, "/abbrev_without.bib"))
     }
     
     cat("\nAbbreviations have been updated.\n\n")
