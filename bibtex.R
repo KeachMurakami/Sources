@@ -1,4 +1,4 @@
-bib_update <-
+update_bib <-
   function(input_dir = "~/GitHub/BeeLabR/BibTex/list_bib/", output_dir = "~/GitHub/BeeLabR/BibTex/"){
     OS <- .Platform$OS.type
     if(OS != "unix"){
@@ -18,24 +18,22 @@ bib_update <-
     cat("\nCitations have been updated.\n\n")
   }
 
-abbrv_update <-
-  function(abbrv_file = "~/GitHub/BeeLabR/BibTex/MyList.xlsx"){
-    abbrv_list <-
-      xlsx::read.xlsx(abbrv_file, sheetIndex = 1)
+update_abbrv <-
+  function(abbrv_file = "~/GitHub/BeeLabR/BibTex/MyAbbrvList.csv"){
     abbrv_dir <-
       dirname(abbrv_file)
-    
-    abbrv_list$Full.1 %>%
-      as.character %>%
-      write(file = paste0(abbrv_dir, "/abbrev_Full.bib"))
 
-    abbrv_list$Abbrv_with_period.1 %>%
-      as.character %>%
-      write(file = paste0(abbrv_dir, "/abbrv_with.bib"))
-    
-    abbrv_list$Abbrv_without_period.1 %>%
-      as.character %>%
-      write(file = paste0(abbrv_dir, "/abbrv_without.bib"))
+    abbrv_list <-
+      read.csv(abbrv_file) %>%
+      mutate(Full = paste0('@string{', Abbrv, '=\"', Full, '\"}'),
+             With = paste0('@string{', Abbrv, '=\"', Abbrv_with_period, '\"}'),
+             Without = paste0('@string{', Abbrv, '=\"', Abbrv_without_period, '\"}')) %>%
+    {
+      .$Full %>% as.character() %>% write(file = paste0(abbrv_dir, "/abbrev_Fulla.bib"))
+      .$With %>% as.character() %>% write(file = paste0(abbrv_dir, "/abbrev_witha.bib"))
+      .$Without %>% as.character() %>% write(file = paste0(abbrv_dir, "/abbrev_withouta.bib"))
+    }
     
     cat("\nAbbreviations have been updated.\n\n")
   }
+
