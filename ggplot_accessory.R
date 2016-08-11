@@ -36,7 +36,7 @@ theme_thesis <-
     theme_bw(base_size = base_size, base_family = base_family) %+replace%
       theme(legend.position = legend,
             legend.title = element_blank(),
-            axis.ticks = element_line(colour = "grey50", size = rel(.75)),
+            axis.ticks = element_line(colour = "black", size = rel(.75)),
             panel.border = element_rect(fill = NA,colour="black"),  
             strip.background = element_blank(),
             panel.grid.major = element_blank(),
