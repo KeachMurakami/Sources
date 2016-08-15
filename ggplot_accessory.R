@@ -63,3 +63,10 @@ gg_y <-
   function(y_range, ...){
     scale_y_continuous(limits = range(y_range), expand = c(0, 0), ...)
   }
+
+### inherit family in geom_text and annotate
+geom_text2 <-
+  function(...) geom_text(family = theme_get()$text[["family"]], ...)
+
+annotate2 <-
+  function(...) annotate(family = theme_get()$text[["family"]], ...)
