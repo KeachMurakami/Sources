@@ -1,3 +1,5 @@
+library(ggplot2)
+
 ### for my ggplot2 theme
 
 gg_theme <-
