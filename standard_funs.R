@@ -13,8 +13,8 @@ se <-
 length2 <- 
   function(x) sum(!is.na(x))
 
-distinct2 <-
-  function(.data, ...) dplyr::distinct(.data, ..., .keep_all = T)
+Distinct <-
+  function(.data, ..., .keep_all) dplyr::distinct(.data, ..., .keep_all = T)
 
 
 `%!in%` <-
