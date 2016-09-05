@@ -13,31 +13,8 @@ se <-
 length2 <- 
   function(x) sum(!is.na(x))
 
-melt2 <- 
-  function(df, cols, ...) {
-    # syntax sugar for melt
-    # input numerics to id.vars
-    
-    #input df was converted into data.table for speed
-    
-    if(length(cols) >= dim(df)[2]) stop(message = "undefined columns selected")
-
-    cols %>%
-    as.numeric %>%
-    colnames(df)[.] %>%
-    data.table::melt(as.data.table(df), id.vars = ., ...)
-  }
-
-rbind_all2 <-
-  function(df) {
-    temp <- options()$warn
-    options(warn = -1)
-    res <-
-      rbind_all(df) %>%
-      as.data.table
-    options(warn = temp)
-    return(res)
-  }
+distinct2 <-
+  function(.data, ...) dplyr::distinct(.data, ..., .keep_all = T)
 
 
 `%!in%` <-
