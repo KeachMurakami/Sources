@@ -54,6 +54,6 @@
     .[[1]] %>%
     {.[!str_detect(., pattern = "Startup")]} %>%
     paste0("https://raw.githubusercontent.com/KeachMurakami/Sources/master/", .)
-  MyFunctions[!str_detect(MyFunctions, pattern = "Startup")] %>%    
+  MyFunctions[!str_detect(MyFunctions, pattern = "Startup")] %>%
     a_ply(., .fun = source_url, .margins = 1)
   

@@ -13,10 +13,6 @@ se <-
 length2 <- 
   function(x) sum(!is.na(x))
 
-Distinct <-
-  function(.data, ..., .keep_all) dplyr::distinct(.data, ..., .keep_all = T)
-
-
 `%!in%` <-
   function (x, table){
     !match(x, table, nomatch = 0L) > 0L
