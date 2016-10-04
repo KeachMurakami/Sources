@@ -10,6 +10,8 @@ require(lubridate)
 require(tidyr)
 
 WriteLog <- function(PubName = "", LogFile = "~/Dropbox/R/my.data/MyWrite.csv"){
+  def_warn <- options()$warn
+  options(warn = -1)
   input <-
     fread(LogFile) %>%
     gather(Pub, words, -Date) %>%
@@ -26,16 +28,20 @@ WriteLog <- function(PubName = "", LogFile = "~/Dropbox/R/my.data/MyWrite.csv"){
     PubName <-
       Vectorize(ifelse)(PubName == "", Task_all, PubName)
   
-  input %>%  
-    filter(Pub %in% PubName) %>%
-    ggplot(aes(Date, words, group = Pub, col = Pub, label = comment)) +
-    theme_bw() +
-    theme(legend.position = "none",
-          legend.key = element_blank(),
-          legend.title = element_blank(),
-          legend.background = element_blank()) +
-    geom_line() +
-    geom_point() +
-    geom_text(aes(y = as.numeric(words) + 100)) +
-    ylab("Words in the body")
+    Fig <-
+      input %>%  
+      filter(Pub %in% PubName) %>%
+      ggplot(aes(Date, words, group = Pub, col = Pub, label = comment)) +
+      theme_bw() +
+      theme(legend.position = "none",
+            legend.key = element_blank(),
+            legend.title = element_blank(),
+            legend.background = element_blank()) +
+      geom_line() +
+      geom_point() +
+      geom_text(aes(y = as.numeric(words) + 100)) +
+      ylab("Words in the body")
+    
+  options(warn = def_warn)
+  return(Fig)
   }
