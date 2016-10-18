@@ -17,7 +17,7 @@ WriteLog <- function(PubName = "", LogFile = "~/Dropbox/R/my.data/MyWrite.csv"){
     gather(Pub, words, -Date) %>%
     na.omit %>%
     separate(col = words, into = c("words", "comment"), sep = "_") %>%
-    mutate(Date = mdy(Date),
+    mutate(Date = ymd(Date),
            words = as.numeric(words))
 
     Task_all <- 
