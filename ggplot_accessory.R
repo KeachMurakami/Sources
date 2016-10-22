@@ -34,16 +34,17 @@ theme_bw2 <-
   }
 
 theme_thesis <-
-  function(base_size = 12, base_family = "", legend = "none"){
+  function(base_size = 12, base_family = "", legend = "none", panel_margin = 0){
     theme_bw(base_size = base_size, base_family = base_family) %+replace%
       theme(legend.position = legend,
             legend.title = element_blank(),
+            legend.justification = c(0, 1),
             axis.ticks = element_line(colour = "black", size = rel(.5)),
             panel.border = element_rect(fill = NA,colour="black"),  
             strip.background = element_blank(),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
-            panel.margin = unit(0, units = "points"),
+            panel.margin = unit(panel_margin, units = "points"),
             strip.text = element_blank()
       )
   }
