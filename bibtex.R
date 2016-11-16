@@ -37,3 +37,9 @@ update_abbrv <-
     cat("\nAbbreviations have been updated.\n\n")
   }
 
+update_cite <- 
+  function(){
+    update_bib()
+    update_abbrv()
+  }
+  
