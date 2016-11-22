@@ -8,8 +8,9 @@ require(stringr)
 require(data.table)
 require(lubridate)
 require(tidyr)
+require(plotly)
 
-WriteLog <- function(PubName = "", LogFile = "~/Dropbox/R/my.data/MyWrite.csv"){
+WriteLog <- function(PubName = "", LogFile = "~/Dropbox/R/my.data/MyWrite.csv", smooth = F, comment = T){
   def_warn <- options()$warn
   options(warn = -1)
   input <-
@@ -27,10 +28,14 @@ WriteLog <- function(PubName = "", LogFile = "~/Dropbox/R/my.data/MyWrite.csv"){
       
     PubName <-
       Vectorize(ifelse)(PubName == "", Task_all, PubName)
-  
-    Fig <-
+
+    input <-  
       input %>%  
       filter(Pub %in% PubName) %>%
+      na.omit
+    
+    Fig <-
+      input %>%
       ggplot(aes(Date, words, group = Pub, col = Pub, label = comment)) +
       theme_bw() +
       theme(legend.position = "none",
@@ -39,9 +44,18 @@ WriteLog <- function(PubName = "", LogFile = "~/Dropbox/R/my.data/MyWrite.csv"){
             legend.background = element_blank()) +
       geom_line() +
       geom_point() +
-      geom_text(aes(y = as.numeric(words) + 100)) +
       ylab("Words in the body")
     
+    if(comment){
+      Fig <-
+        Fig + geom_text(aes(y = as.numeric(words) + 100))
+    }
+    # if(smooth){
+    #   Fig <-
+    #     Fig +
+    #     geom_smooth(method = "loess")
+    # }
   options(warn = def_warn)
   return(Fig)
+  # ggplotly(Fig)
   }
