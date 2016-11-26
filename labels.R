@@ -1,6 +1,17 @@
 # Generalized
 labeler <-
-  function(text = "", units, dims, pre = "", abbrev = "", two_row = F){
+  function(text = "", units = "mol,m,s", dims = "1,-2,-1", pre = "", two_row = F, abbrev = "''"){
+    
+    units <- 
+      units %>%
+      stringr::str_split(string = ., pattern = ",") %>%
+      .[[1]]
+    
+    dims <-
+      dims %>%
+      stringr::str_split(string = ., pattern = ",") %>%
+      .[[1]]
+    
     if(length(units) != length(dims)) stop("units and dims must be the same length")
 
     unit <-
@@ -29,7 +40,7 @@ labeler <-
         abbrev
       )
     
-    if_else(two_row, ", ", " ~ ") %>%
+    if_else(two_row, "'', ", " ~ ") %>%
       paste0("bquote(atop('", text, "' * ", abbreviated_quantity, ., unit, "))") %>%
       {eval(parse(text = .))}
   }
