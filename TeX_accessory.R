@@ -1,3 +1,35 @@
+### cross reference insert
+
+fig_ref <-
+  function(fig_label, prefix = T){
+    fig_num <- length(fig_label)
+    if(!prefix) fig_prefix <- c("", "")
+    
+    if(fig_num == 1){
+      paste0(fig_prefix[1], " \\ref{fig:", fig_label, "}")
+    } else {
+      paste0(" \\ref{fig:", fig_label, "}") %>%
+        str_c(., collapse = ",") %>%
+        paste0(fig_prefix[2], .)
+    }
+  }
+
+table_ref <-
+  function(table_label, prefix = T){
+    table_num <- length(fig_label)
+    if(!prefix) fig_prefix <- c("", "")
+    
+    if(table_num == 1){
+      paste0(table_prefix[1], " \\ref{table:", table_label, "}")
+    } else {
+      paste0(" \\ref{table:", table_label, "}") %>%
+        str_c(., collapse = ",") %>%
+        paste0(table_prefix[2], .)
+    }
+  }
+
+
+
 ### add Eqn, Fig, Table number automatically
 
 EqnHead <- ""
