@@ -16,8 +16,8 @@ fig_ref <-
 
 table_ref <-
   function(table_label, prefix = T){
-    table_num <- length(fig_label)
-    if(!prefix) fig_prefix <- c("", "")
+    table_num <- length(table_label)
+    if(!prefix) table_prefix <- c("", "")
     
     if(table_num == 1){
       paste0(table_prefix[1], " \\ref{table:", table_label, "}")
@@ -88,3 +88,21 @@ TableSupNum <-
     TableSupNum_count <<- TableSupNum_count + 1
     return(paste0(head, TableSupNum_count, " ", Caption))
   }
+
+setPrefix <-
+  function(Sep = ""){
+    EqnHead <<- paste0(Sep)
+    FigHead <<- paste0("Fig.", Sep)
+    TableHead <<- paste0("Table", Sep)
+    EqnSupHead <<- paste0("S", Sep)
+    FigSupHead <<- paste0("Fig. S", Sep)
+    TableSupHead <<- paste0("Table S", Sep)
+    
+    EqnNum_count <<- 0
+    FigNum_count <<- 0
+    TableNum_count <<- 0
+    EqnSupNum_count <<- 0
+    FigSupNum_count <<- 0
+    TableSupNum_count <<- 0
+  }
+
